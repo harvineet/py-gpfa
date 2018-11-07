@@ -47,7 +47,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 	param_notes_learnGPNoise      = False
 	param_notes_RforceDiagonal    = True
 
-	currentParams = [param_cov_type, param_gamma, param_eps,
+	current_params = [param_cov_type, param_gamma, param_eps,
 					param_d, param_C, param_R,
 					param_notes_learnKernelParams, param_notes_learnGPNoise,param_notes_RforceDiagonal]
 
@@ -55,11 +55,11 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 	# TODO
 	print('\nFitting GPFA model\n')
   
-	(est_params, seq_train_cut, LLcut, iter_time) = em(currentParams, seqTrainCut, extraOpts{:});
+	(est_params, seq_train_cut, LLcut, iter_time) = em(*current_params, seqTrainCut)
 
-	# Extract neural trajectories for original, unsegmented trials
+	# Extract trajectories for original, unsegmented trials
 	# using learned parameters
-	(seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params);
+	(seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params)
 
 	result = None
 
