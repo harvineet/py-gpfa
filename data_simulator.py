@@ -9,8 +9,9 @@ import numpy as np
 # Simulate
 # TODO
 # sample output
-seq = [Seq_Data_Class(i, 20, 1, np.random.rand(53,20)) for i in range(10)]
-print(seq)
+def sample_data():
+	seq = [Seq_Data_Class(i, 20, 1, np.random.rand(53,20)) for i in range(10)]
+	return seq
 
 # Save to file
 # TODO
@@ -19,3 +20,7 @@ print(seq)
 def load_data():
     # TODO
     return None
+
+if __name__ == "__main__":
+    print("Running")
+    print(sample_data())
