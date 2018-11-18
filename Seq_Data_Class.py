@@ -4,6 +4,7 @@
 # seq = Seq_Data_Class(trial_id, T, seq_id, y)
 # seq.y = np.zeros((10,1))
 import scipy.io as sio
+import numpy as np
 
 class Model_Specs:
     def __init__(self, data, params):
@@ -24,6 +25,16 @@ class Model_Specs:
             # Store in data object and append to list
             data.append(Trial_Class(trial_id, T, seq_id, y))
         self.data = data
+    
+    # Helper function to stack variables across trials
+    # e.g., sometimes we want vector np.array([data[0].y, data[1].y, data[2].y, ...])
+    def stack_attributes(self, attribute):
+        attributes_stacked = np.zeros(getattr(self.data[0], attribute).shape)
+        for i in range(len(self.data)):
+            attributes_stacked = np.hstack((attributes_stacked, getattr(self.data[i], attribute)))
+        attributes_stacked = np.delete(attributes_stacked, np.s_[0:getattr(self.data[0], attribute).shape[1]], 1)
+        return attributes_stacked
+            
 
 class Trial_Class:
     def __init__(self, trial_id, T, seq_id, y):
@@ -31,6 +42,9 @@ class Trial_Class:
         self.T = T
         self.seq_id = seq_id
         self.y = y
+        self.xsm = None
+        self.Vsm = None
+        self.VsmGP = None
     # Function to print objects
     def __repr__(self):
         return "("+",".join(map(str, [self.trial_id, self.T, self.seq_id] + list(self.y.shape)))+")"
