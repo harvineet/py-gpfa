@@ -29,10 +29,14 @@ class Model_Specs:
     # Helper function to stack variables across trials
     # e.g., sometimes we want vector np.array([data[0].y, data[1].y, data[2].y, ...])
     def stack_attributes(self, attribute):
-        attributes_stacked = np.zeros(getattr(self.data[0], attribute).shape)
-        for i in range(len(self.data)):
-            attributes_stacked = np.hstack((attributes_stacked, getattr(self.data[i], attribute)))
-        attributes_stacked = np.delete(attributes_stacked, np.s_[0:getattr(self.data[0], attribute).shape[1]], 1)
+        if getattr(self.data[0], attribute).size is 1:
+            attributes_stacked = np.zeros(len(self.data), dtype='int16')
+            for i in range(len(self.data)):
+                attributes_stacked[i] = getattr(self.data[i], attribute)
+        else:
+            attributes_stacked = np.array([]).reshape(getattr(self.data[0], attribute).shape[0], 0)
+            for i in range(len(self.data)):
+                attributes_stacked = np.hstack((attributes_stacked, getattr(self.data[i], attribute)))
         return attributes_stacked
             
 
