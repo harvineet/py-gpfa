@@ -5,8 +5,8 @@ from core_gpfa.gpfa_engine import gpfa_engine # CHECK if works
 
 def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     
-    bin_width      = 20 # in msec # NOT REQUIRED
-    num_folds      = 0
+    bin_width = 20 # in msec # NOT REQUIRED
+    num_folds = 0
     
     # Create results directory if not exists
     if not os.path.exists(output_dir):
@@ -30,9 +30,10 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     # TODO, set minVarFrac and pass to gpfa_engine
 
     # Name of results file
-    output_file = output_dir+"/"+method+"_xdim_"+x_dim
+    output_file = output_dir+"/"+method+"_xdim_"+str(x_dim)
     
     # Call gpfa
+    result = None
     result = gpfa_engine(seq_train=seq_train, seq_test=seq_test, fname=output_file,
         x_dim=x_dim, bin_width=bin_width)
 

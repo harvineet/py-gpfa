@@ -1,10 +1,10 @@
 # Run GPFA to extract trajectories
 
 import numpy as np
-from fastfa import fastfa # CHECK if import works
-from exact_inference_with_LL import exact_inference_with_LL
-from em import em
-from Param_GPFA_Class import Param_GPFA_Class
+from core_gpfa.fastfa import fastfa # CHECK if import works
+from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
+from core_gpfa.em import em
+from Seq_Data_Class import Param_Class
 
 # Skip or trim sequences to same length
 def cut_trials(seq_train, seg_length=20):
@@ -21,34 +21,34 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # start_eps - GP noise variance initialization
 
     # For compute efficiency, train on equal-length segments of trials
-    seq_train_cut = cut_trials(seq_train)
+    seq_train_cut = cut_trials(seq_train) # TODO
 
     # Initialize state model parameters
     param_cov_type = 'rbf'
     # GP timescale
     # Assume binWidth is the time step size.
-    param_gamma = (bin_width / start_tau)^2 * np.ones((1, x_dim))
+    param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
     # GP noise variance
-    param_eps = start_eps * np.ones((1, x_dim))
+    param_eps = start_eps * np.ones((x_dim,))
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
-    y_all = [] # TODO seqTrainCut.y
+    y_all = [trial.y for trial in seq_train_cut]
 
     print('\nRunning FA model for initialization\n')
 
-    (fa_params, faLL) = fastfa(y_all, x_dim)
+    (fa_params_L, fa_params_Ph, faLL) = fastfa(y_all, x_dim) # TODO Fast FA
 
-    param_d = np.mean(y_all, 2)
-    param_C = [] # TODO faParams.L
-    param_R = [] # TODO diag(faParams.Ph)
+    param_d = np.mean(y_all, 1, keepdims=True)
+    param_C = fa_params_L # TODO faParams.L
+    param_R = np.diag(fa_params_Ph) # TODO diag(faParams.Ph)
 
     # Define parameter constraints
     param_notes_learnKernelParams = True
     param_notes_learnGPNoise      = False
     param_notes_RforceDiagonal    = True
 
-    current_params = Param_GPFA_Class(param_cov_type, param_gamma, 
+    current_params = Param_Class(param_cov_type, param_gamma, 
                                     param_eps, param_d, param_C, param_R,
                                     param_notes_learnKernelParams, param_notes_learnGPNoise,
                                     param_notes_RforceDiagonal)
@@ -57,7 +57,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # TODO
     print('\nFitting GPFA model\n')
   
-    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seqTrainCut)
+    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut)
 
     # Extract trajectories for original, unsegmented trials
     # using learned parameters
