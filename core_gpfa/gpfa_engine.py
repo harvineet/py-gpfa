@@ -30,6 +30,8 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
     # GP noise variance
     param_eps = start_eps * np.ones((x_dim,))
+    
+    kernSDList = [30]
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
@@ -57,7 +59,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # TODO
     print('\nFitting GPFA model\n')
   
-    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut)
+    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList)
 
     # Extract trajectories for original, unsegmented trials
     # using learned parameters

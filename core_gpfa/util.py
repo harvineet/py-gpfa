@@ -25,7 +25,7 @@ def invToeplitz(T):
 def invPerSymm(M, blk_size, off_diag_sparse):
     
     invM = np.linalg.inv(M) # TODO use block persymmetric property
-    logdet_M = -logdet(invM);
+    logdet_M = -logdet(invM)
 
     return invM, logdet_M
 
@@ -44,5 +44,5 @@ def fillPerSymm(Pin, blk_size, T):
 
     Pout = np.concatenate([Pin, Pin[np.ix_(idx_half.flatten(order="F"), idx_full.flatten(order="F"))]], 0)
     # use ‘F’ to flatten in column-major (Fortran- style) order.
-    
+
     return Pout

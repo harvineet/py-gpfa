@@ -6,9 +6,7 @@ import scipy.linalg
 from core_gpfa.util import invPerSymm, fillPerSymm, logdet
 from core_gpfa.make_K_big import make_K_big
 
-def exact_inference_with_LL(seq, params):
-
-    getLL = True # TODO pass as input to exact_inference_with_LL
+def exact_inference_with_LL(seq, params, getLL = False):
 
     y_dim, x_dim = params.C.shape
 
@@ -89,7 +87,6 @@ def exact_inference_with_LL(seq, params):
             seq[n].VsmGP = VsmGP
 
             ctr += 1
-        print(Tu[j], T,type(T))
         # Compute data likelihood
         if getLL:
             val = -T * logdet_R - logdet_K_big - logdet_M - y_dim * T * np.log(2*np.pi)
@@ -101,5 +98,4 @@ def exact_inference_with_LL(seq, params):
     else:
         LL = np.nan
 
-    print(LL)
     return seq, LL

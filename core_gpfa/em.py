@@ -3,29 +3,32 @@
 from data_simulator import load_params
 
 # Run EM
-"""
-def em(current_params, seq):
+
+"""def em(current_params, seq):
     # TODO
     params = load_params('../em_input.mat')
 
     # est_params, seq_train_cut, LLcut, iter_time
     return params, seq, None, None"""
 
-def em(model, kernSDList):
-	emMaxIters = 500
+def em(current_params, seq, kernSDList):
+    # TODO Change model to est_params, seq
+    current_params = load_params('../em_input.mat')
+    
+    emMaxIters = 500
     tol        = 1e-8
     minVarFrac = 0.01
     verbose    = False
     freqLL     = 10 
 
-    N = len(model.data);
-    T = model.stack_attributes('T')
-    yDim, xDim = model.params.C.shape
+    N = len(seq);
+    T = [trial.T for trial in seq] # model.stack_attributes('T')
+    yDim, xDim = current_params.C.shape
     LL         = []
     LLi        = 0
     iterTime   = []
 
-    ycov = np.cov(model.stack_attributes('y'))
+    ycov = np.cov(np.concatenate([trial.y for trial in seq], 1)) # model.stack_attributes('y')
     varFloor   = minVarFrac * np.diag(ycov);
 
     for i in range(emMaxIters):
@@ -50,7 +53,7 @@ def em(model, kernSDList):
         sum_Pauto = np.zeros((xDim, xDim))
 
         for n in range(N):
-            sum_Pauto = sum_Pauto + np.sum(model.data[n].Vsm, 2) + np.matmul(model.data[n].xsm, model.data[n].xsm.T)
+            sum_Pauto = sum_Pauto + np.sum(seq[n].Vsm, 2) + np.matmul(seq[n].xsm, seq[n].xsm.T)
 
         Y           = model.stack_attributes('y')
         Xsm         = model.stack_attributes('xsm')
@@ -62,36 +65,36 @@ def em(model, kernSDList):
         Cd = np.linalg.lstsq(term.T,np.hstack(( sum_yxtrans, sum_yall.reshape(yDim,1) )).T, rcond=None)
         Cd = Cd[0].T
 
-        model.params.C = Cd[:, :xDim]
-        model.params.d = Cd[:, -1]
+        current_params.C = Cd[:, :xDim]
+        current_params.d = Cd[:, -1]
 
-        if model.params.RforceDiagonal:
+        if current_params.RforceDiagonal:
             sum_yytrans = np.sum(Y * Y, 1)
-            yd          = sum_yall * model.params.d
-            term        = np.sum((sum_yxtrans - np.outer(model.params.d, sum_xall)) * model.params.C, 1)
-            r           = np.square(model.params.d) + (sum_yytrans - 2*yd - term) / np.sum(T)
+            yd          = sum_yall * current_params.d
+            term        = np.sum((sum_yxtrans - np.outer(current_params.d, sum_xall)) * current_params.C, 1)
+            r           = np.square(current_params.d) + (sum_yytrans - 2*yd - term) / np.sum(T)
             # Set minimum private variance
             r               = np.maximum(varFloor, r)
-            model.params.R  = np.diag(r)
+            current_params.R  = np.diag(r)
         else:
             sum_yytrans = np.matmul(Y, Y.T)
-            yd          = np.outer(sum_yall, model.params.d)
-            term        = np.matmul((sum_yxtrans - np.outer(model.params.d, sum_xall.T)), model.params.C.T)
-            R           = np.outer(model.params.d, model.params.d) + (sum_yytrans - yd - yd.T - term) / np.sum(T)
-            model.params.R = (R + R.T) / 2
+            yd          = np.outer(sum_yall, current_params.d)
+            term        = np.matmul((sum_yxtrans - np.outer(current_params.d, sum_xall.T)), current_params.C.T)
+            R           = np.outer(current_params.d, current_params.d) + (sum_yytrans - yd - yd.T - term) / np.sum(T)
+            current_params.R = (R + R.T) / 2
         
-        if model.params.learnKernelParams:
+        if current_params.learnKernelParams:
        
             res = learn_GP_params(model, verbose, kernSDList)
-            if model.params.cov_type == 'rbf':
-                model.params.gamma = res.gamma
-            elif model.params.cov_type == 'tri':
-                model.params.a     = res.a
-            elif model.params.cov_type == 'logexp':
-                model.params.a     = res.a
+            if current_params.cov_type == 'rbf':
+                current_params.gamma = res.gamma
+            elif current_params.cov_type == 'tri':
+                current_params.a     = res.a
+            elif current_params.cov_type == 'logexp':
+                current_params.a     = res.a
 
-        if model.params.learnGPNoise: 
-            model.params.eps = res.eps
+        if current_params.learnGPNoise: 
+            current_params.eps = res.eps
         
         tEnd = tic - timeit.default_timer()
         iterTime.append(tEnd)
@@ -120,7 +123,7 @@ def em(model, kernSDList):
     if len(LL) < emMaxIters:
         printf('Fitting has converged after', len(LL), 'EM iterations.\n')
 
-    if any(np.diag(model.params.R) == varFloor):
+    if any(np.diag(current_params.R) == varFloor):
         print('Warning: Private variance floor used for one or more observed dimensions in GPFA.\n')
 
     return model, LL, iterTime
