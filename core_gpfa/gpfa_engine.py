@@ -63,7 +63,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 
     # Extract trajectories for original, unsegmented trials
     # using learned parameters
-    (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params)
+    (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, True)
 
     result = None
 

@@ -39,14 +39,14 @@ def exact_inference_with_LL(seq, params, getLL = False):
 
         off_diag_sparse = True
         invM, logdet_M = invPerSymm(K_big_inv + scipy.linalg.block_diag(*blah), x_dim, off_diag_sparse)
-
+        
         # compute posterior covariance matrix
         Vsm = np.full((x_dim, x_dim, T), np.nan)
         idx = np.arange(0, x_dim*(T)+1, x_dim) # TODO check if 1: x_dim : (x_dim*T + 1)
 
         for t in range(T):
             cIdx = np.arange(idx[t],idx[t+1])
-            Vsm[:,:,t] = invM[cIdx, cIdx]
+            Vsm[:,:,t] = invM[np.ix_(cIdx, cIdx)]
 
         # T x T posterior covariance for each GP
         VsmGP = np.full((T, T, x_dim), np.nan)
@@ -54,12 +54,12 @@ def exact_inference_with_LL(seq, params, getLL = False):
         # index offset, so no change for 0-indexing
 
         for i in range(x_dim):
-            VsmGP[:,:,i] = invM[idx+i,idx+i]
+            VsmGP[:,:,i] = invM[np.ix_(idx+i,idx+i)]
 
         # Process all trials with length T
         n_list = [i for i,x in enumerate(T_all) if x == T]
         dif = np.concatenate([trial.y for trial in seq if trial.T == T], 1) \
-                - params.d.reshape((params.d.shape[0],1)) # y_dim x sum(T)
+                - params.d.reshape((params.d.shape[0],1), order="F") # y_dim x sum(T)
         term1Mat = np.matmul(CRinv, dif).reshape((x_dim*T, -1), order="F").copy() # (x_dim*T) x length(n_list) 
         # Fortran-like order for reshaping
 
@@ -82,7 +82,7 @@ def exact_inference_with_LL(seq, params, getLL = False):
 
         ctr = 0
         for n in n_list:
-            seq[n].xsm = xsmMat[:,ctr].reshape((x_dim, T)) # check if changing inplace or copy needed
+            seq[n].xsm = xsmMat[:,ctr].reshape((x_dim, T), order="F") # check if changing inplace or copy needed
             seq[n].Vsm = Vsm
             seq[n].VsmGP = VsmGP
 

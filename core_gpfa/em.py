@@ -1,10 +1,13 @@
 # EM implementation
 
 from data_simulator import load_params
+from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
+import numpy as np
+import timeit
 
 # Run EM
 
-"""def em(current_params, seq):
+"""def em(current_params, seq, kernSDList):
     # TODO
     params = load_params('../em_input.mat')
 
@@ -46,7 +49,7 @@ def em(current_params, seq, kernSDList):
         # ====== E step ======
         if not np.isnan(LLi):
             LLold = LLi
-        model, LLi = exact_inference_with_LL(model, getLL)
+        seq, LLi = exact_inference_with_LL(seq, current_params, getLL)
         LL.append(LLi)
 
         # ====== M step ======
@@ -55,8 +58,8 @@ def em(current_params, seq, kernSDList):
         for n in range(N):
             sum_Pauto = sum_Pauto + np.sum(seq[n].Vsm, 2) + np.matmul(seq[n].xsm, seq[n].xsm.T)
 
-        Y           = model.stack_attributes('y')
-        Xsm         = model.stack_attributes('xsm')
+        Y           = np.concatenate([trial.y for trial in seq], 1) # model.stack_attributes('y')
+        Xsm         = np.concatenate([trial.xsm for trial in seq], 1) # model.stack_attributes('xsm')
         sum_yxtrans = np.matmul(Y, Xsm.T)
         sum_xall    = np.sum(Xsm, 1)
         sum_yall    = np.sum(Y, 1)
@@ -85,7 +88,7 @@ def em(current_params, seq, kernSDList):
         
         if current_params.learnKernelParams:
        
-            res = learn_GP_params(model, verbose, kernSDList)
+            res = learn_GP_params(seq, current_params, verbose, kernSDList)
             if current_params.cov_type == 'rbf':
                 current_params.gamma = res.gamma
             elif current_params.cov_type == 'tri':
@@ -126,4 +129,6 @@ def em(current_params, seq, kernSDList):
     if any(np.diag(current_params.R) == varFloor):
         print('Warning: Private variance floor used for one or more observed dimensions in GPFA.\n')
 
-    return model, LL, iterTime
+    est_params = current_params
+
+    return est_params, seq, LL, iterTime
