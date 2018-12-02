@@ -2,6 +2,7 @@
 
 from data_simulator import load_params
 from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
+from core_gpfa.learn_hyperparams import learn_GP_params
 import numpy as np
 import timeit
 
@@ -16,12 +17,12 @@ import timeit
 
 def em(current_params, seq, kernSDList):
     # TODO Change model to est_params, seq
-    current_params = load_params('../em_input.mat')
+    # current_params = load_params('../em_input.mat')
     
     emMaxIters = 500
     tol        = 1e-8
     minVarFrac = 0.01
-    verbose    = False
+    verbose    = True
     freqLL     = 10 
 
     N = len(seq);
@@ -37,8 +38,6 @@ def em(current_params, seq, kernSDList):
     for i in range(emMaxIters):
 
         # Time each iteration
-        if verbose:
-            print('\n')
         tic = timeit.default_timer()
     
         if np.remainder(i+1,freqLL) == 0 or i <= 1:
@@ -59,9 +58,9 @@ def em(current_params, seq, kernSDList):
             sum_Pauto = sum_Pauto + np.sum(seq[n].Vsm, 2) + np.matmul(seq[n].xsm, seq[n].xsm.T)
 
         Y           = np.concatenate([trial.y for trial in seq], 1) # model.stack_attributes('y')
-        Xsm         = np.concatenate([trial.xsm for trial in seq], 1) # model.stack_attributes('xsm')
+        Xsm         = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq], 1) # model.stack_attributes('xsm')
         sum_yxtrans = np.matmul(Y, Xsm.T)
-        sum_xall    = np.sum(Xsm, 1)
+        sum_xall    = np.ravel(np.sum(Xsm, 1))
         sum_yall    = np.sum(Y, 1)
 
         term = np.vstack((np.hstack((sum_Pauto, sum_xall.reshape(xDim,1))), np.hstack((sum_xall.T,np.sum(T)))))
@@ -74,11 +73,11 @@ def em(current_params, seq, kernSDList):
         if current_params.RforceDiagonal:
             sum_yytrans = np.sum(Y * Y, 1)
             yd          = sum_yall * current_params.d
-            term        = np.sum((sum_yxtrans - np.outer(current_params.d, sum_xall)) * current_params.C, 1)
+            term        = np.sum(np.multiply((sum_yxtrans - np.outer(current_params.d, sum_xall)), current_params.C), 1)
             r           = np.square(current_params.d) + (sum_yytrans - 2*yd - term) / np.sum(T)
             # Set minimum private variance
             r               = np.maximum(varFloor, r)
-            current_params.R  = np.diag(r)
+            current_params.R  = np.diag(r) * np.identity(current_params.R.shape[0])
         else:
             sum_yytrans = np.matmul(Y, Y.T)
             yd          = np.outer(sum_yall, current_params.d)
@@ -87,14 +86,12 @@ def em(current_params, seq, kernSDList):
             current_params.R = (R + R.T) / 2
         
         if current_params.learnKernelParams:
-       
-            res = learn_GP_params(seq, current_params, verbose, kernSDList)
+
+            res = learn_GP_params(seq, current_params)
             if current_params.cov_type == 'rbf':
-                current_params.gamma = res.gamma
-            elif current_params.cov_type == 'tri':
-                current_params.a     = res.a
-            elif current_params.cov_type == 'logexp':
-                current_params.a     = res.a
+                current_params.gamma = res
+            elif current_params.cov_type == 'sm':
+                print('')
 
         if current_params.learnGPNoise: 
             current_params.eps = res.eps
@@ -106,21 +103,16 @@ def em(current_params, seq, kernSDList):
         if verbose:
             if getLL:
                 print('       lik', LLi,'(', tEnd, 'sec iteration)\n')
-            else:
-                print('\n')
         else:
             if getLL:
                 print('       lik', LLi, '\n')
-            else:
-                print('\n')
 
         # Verify that likelihood is growing monotonically - stop when it isn't decreasing anymore
         if i <= 2:
             LLbase = LLi
         elif LLi < LLold:
-            print('\n Error: Data likelihood has decreased from', LLold,'to', LLi, '\n')
+            print('Error: Data likelihood has decreased from', LLold,'to', LLi, '\n')
         elif (LLi-LLbase) < (1+tol)*(LLold-LLbase):
-            print('\n')
             break
 
     if len(LL) < emMaxIters:
