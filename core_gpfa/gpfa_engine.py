@@ -5,11 +5,16 @@ from core_gpfa.fastfa import fastfa # CHECK if import works
 from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
 from core_gpfa.em import em
 from Seq_Data_Class import Param_Class
+import scipy.io as sio
 
 # Skip or trim sequences to same length
 def cut_trials(seq_train, seg_length=20):
     # TODO
     return seq_train
+
+def save_results(fname, LL, params, seq):
+    # Saving a dict with keys 'LL', 'params' and 'seq'
+    sio.savemat(fname, mdict=dict({'LL':LL, 'params':params, 'seq':seq}), format='5')
 
 def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     start_tau=100, start_eps=1e-3):
@@ -56,7 +61,6 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
                                     param_notes_RforceDiagonal)
 
     # Fit model parameters
-    # TODO
     print('\nFitting GPFA model\n')
   
     (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList)
@@ -72,5 +76,6 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 
     # Save results
     # TODO
+    save_results(fname, LLtrain, est_params, seq_train)
 
     return result

@@ -4,6 +4,7 @@
 
 from extract_traj import extract_traj
 from data_simulator import load_data
+import numpy as np
 
 # set random seed for reproducibility
 np.random.seed(0)
