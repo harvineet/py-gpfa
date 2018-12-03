@@ -5,6 +5,9 @@
 from extract_traj import extract_traj
 from data_simulator import load_data
 
+# set random seed for reproducibility
+np.random.seed(0)
+
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
 INPUT_FILE = '../em_input.mat'

@@ -3,3 +3,7 @@
 
 # output folder
 output/*
+
+# IPython
+.ipynb_checkpoints/*
+optimization_gpfa.ipynb
