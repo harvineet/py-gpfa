@@ -35,7 +35,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
-    y_all = [trial.y for trial in seq_train_cut]
+    y_all = np.concatenate([trial.y for trial in seq_train_cut], 1)
 
     print('\nRunning FA model for initialization\n')
 
