@@ -12,9 +12,9 @@ def cut_trials(seq_train, seg_length=20):
     # TODO
     return seq_train
 
-def save_results(fname, LL, params, seq):
-    # Saving a dict with keys 'LL', 'params' and 'seq'
-    sio.savemat(fname, mdict=dict({'LL':LL, 'params':params, 'seq':seq}), format='5')
+def save_results(fname, result):
+    # Saving a dict with keys: 'LL', 'params' and 'seq'
+    sio.savemat(fname, mdict=result, format='5')
 
 def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     start_tau=100, start_eps=1e-3):
@@ -36,7 +36,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # GP noise variance
     param_eps = start_eps * np.ones((x_dim,))
     
-    kernSDList = [30]
+    kernSDList = 30
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
@@ -67,15 +67,14 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 
     # Extract trajectories for original, unsegmented trials
     # using learned parameters
-    (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, True)
+    (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, getLL=True)
 
-    result = None
+    result = dict({'LL':LLtrain, 'params':est_params, 'seq':seq_train})
 
     # Assess generalization performance
     # TODO
 
     # Save results
-    # TODO
-    save_results(fname, LLtrain, est_params, seq_train)
+    save_results(fname, result)
 
     return result

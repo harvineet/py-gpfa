@@ -49,6 +49,7 @@ class Trial_Class:
         self.xsm = None
         self.Vsm = None
         self.VsmGP = None
+        self.x_orth = [] # savemat gives error when this is None
 
     # Function to print objects
     def __repr__(self):
@@ -70,6 +71,7 @@ class Param_Class():
         self.learnKernelParams = param_notes_learnKernelParams
         self.learnGPNoise = param_notes_learnGPNoise
         self.RforceDiagonal = param_notes_RforceDiagonal
+        self.C_orth = [] # savemat gives error when this is None
     
     # Load model parameters from a .mat file
     def params_from_mat(self, path_to_mat):
