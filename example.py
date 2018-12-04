@@ -32,5 +32,7 @@ result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_di
 # Plot trajectories in 3D space
 plot_3d(seq_train, 'x_orth', dims_to_plot=[0,1,2])
 
+# TODO plots for each dimension of trajectory
+
 # Cross-validation to find optimal state dimensionality
 # TODO
