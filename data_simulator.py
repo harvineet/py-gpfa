@@ -122,11 +122,10 @@ def generate_trial_data(params, K, xDim, T):
 
 # Save to file
 def save_data(filepath,sample_data):
-    # TODO
+    # sample_data is a seq of trial
     save = {}
-    
     for i in range(len(sample_data)):
-        save[str(i)] = sample_data[i]
+        save[str(i)] = [sample_data[i].x,sample_data[i].y]
     scipy.io.savemat(filepath,save,do_compression=True)
     print("Saved file at", filepath)
 
@@ -159,6 +158,6 @@ def load_params(filepath):
 
 if __name__ == "__main__":
     print("Simulating data")
-    sample_data = sample_data(20)
+    
     print(sample_data)
     save_data('sample.mat',sample_data)
