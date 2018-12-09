@@ -41,15 +41,15 @@ class Model_Specs:
             
 
 class Trial_Class:
-    def __init__(self, trial_id, T, seq_id, y):
+    def __init__(self, trial_id, T, seq_id, y,x):
         self.trial_id = trial_id
         self.T = T
         self.seq_id = seq_id
         self.y = y
+        self.x = x
         self.xsm = None
         self.Vsm = None
         self.VsmGP = None
-        self.x_orth = [] # savemat gives error when this is None
 
     # Function to print objects
     def __repr__(self):
@@ -61,7 +61,7 @@ class Param_Class():
     def __init__(self, param_cov_type=None, param_gamma=None, 
                     param_eps=None, param_d=None, param_C=None, param_R=None,
                     param_notes_learnKernelParams=None, param_notes_learnGPNoise=None,
-                    param_notes_RforceDiagonal=None, param_Q=None):
+                    param_notes_RforceDiagonal=None):
         self.cov_type = param_cov_type
         self.gamma = param_gamma
         self.eps = param_eps
@@ -71,8 +71,6 @@ class Param_Class():
         self.learnKernelParams = param_notes_learnKernelParams
         self.learnGPNoise = param_notes_learnGPNoise
         self.RforceDiagonal = param_notes_RforceDiagonal
-        self.C_orth = []   # savemat gives error when this is None
-        self.Q = param_Q   # number of mixtures in
     
     # Load model parameters from a .mat file
     def params_from_mat(self, path_to_mat):
@@ -80,7 +78,7 @@ class Param_Class():
         # Load individual parameters
         content = mat_contents['currentParams'][0][0]
         self.cov_type = content[0][0]
-        self.gamma = content[1][0].tolist()
+        self.gamma = content[1][0]
         self.eps = content[2][0]
         self.d = content[3].T[0]
         self.C = content[4]
