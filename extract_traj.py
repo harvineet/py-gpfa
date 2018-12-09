@@ -7,7 +7,7 @@ from core_gpfa.gpfa_engine import gpfa_engine
 def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     
     bin_width = 20 # in msec # NOT REQUIRED
-    num_folds = 1 # number of splits, keep 1 for using all train data
+    num_folds = 1 # number of splits, set 1 for using all train data
     
     # Create results directory if not exists
     if not os.path.exists(output_dir):
@@ -22,7 +22,9 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     f_div = np.floor(np.linspace(0, N, num_folds+1))
 
     for cvf in range(num_folds):
-        if num_folds==1:
+        # cvf=0 runs on all data as training set
+        # TODO cvf=1 runs on all data as testing set
+        if cvf==0:
             print("Training on all data")    
             # seq_train = data # TODO, change to numpy.array
             # seq_test = [] # TODO, change to numpy.array
@@ -30,11 +32,11 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
             print("Cross-validation fold %d of %d" % (cvf, num_folds))
         
         test_mask = np.zeros(N, dtype=bool)
-        if num_folds > 1:
-            test_mask[np.arange(f_div[cvf],f_div[cvf+1], dtype=int)] = True
+        if cvf > 0:
+            test_mask[np.arange(f_div[cvf-1],f_div[cvf], dtype=int)] = True
         train_mask = ~test_mask
 
-        if num_folds == 1:
+        if cvf == 0:
             # Keep original order if using all data as training set
             tr = np.arange(0, N)
         else:
@@ -51,12 +53,16 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
         # Check if training data covariance is full rank
         # TODO
 
+        print('Number of trials in training: %d\n', len(seq_train));
+        print('Number of trials in testing: %d\n', len(seq_test));
+        print('Dimensionality of latent space: %d\n', x_dim);
+
         # If doing cross-validation, don't use private noise variance floor
         # TODO, set minVarFrac and pass to gpfa_engine
 
         # Name of results file
         output_file = output_dir+"/"+method+"_xdim_"+str(x_dim)
-        if num_folds > 1:
+        if cvf > 0:
             output_file += "_cv"+str(cvf)
         
         # Call gpfa
