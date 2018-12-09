@@ -24,7 +24,7 @@ def sample_data(kernel,params,time):
     p = C.shape[1]
     
     #create kernel K
-    if kernel == 'RBF':
+    if kernel == 'rbf':
         K = []
         Tdif = np.tile(np.arange(1,T+1).reshape((T,1)), (1, T)) - np.tile(np.arange(1,T+1), (T, 1))
         diffSq = Tdif ** 2
@@ -36,7 +36,7 @@ def sample_data(kernel,params,time):
             K.append(Kmax)
         
         
-    if kernel == 'SM':
+    if kernel == 'sm':
         K = []
         Tdif = np.tile(np.arange(1,T+1).reshape((T,1)), (1, T)) - np.tile(np.arange(1,T+1), (T, 1))
         diffSq = Tdif ** 2
@@ -65,7 +65,7 @@ def sample_data(kernel,params,time):
     #adding X,Y to trial in the seq    
     for i in range (time):
         seq[i].x, seq[i].y = sample_once()
-    return seq
+    return seq, params
 
 def sample_sm(T, ntrials, xDim, Q):
     # N       - number of timesteps per trial
@@ -121,25 +121,20 @@ def generate_trial_data(params, K, xDim, T):
     return Y
 
 # Save to file
-def save_data(filepath,sample_data):
+def save_data(filepath,sample_data,params):
     # sample_data is a seq of trial
     # save X,Y to mat file 
-    save = {}
-    for i in range(len(sample_data)):
-        save['X' + str(i)] = sample_data[i].x
-        save['Y'+ str(i)]  = sample_data[i].y
+    save = {'seq':[]}
+    for i in range (len(sample_data)):
+        save['seq'].append([[[[sample_data[i].trial_id]],[[sample_data[i].T]],[[sample_data[i].seq_id]],sample_data[i].x,sample_data[i].y]])
+    save['currentParams'] = [[[[params.cov_type],[params.gamma],[params.eps],[params.d],params.C,params.R]]]
+    #save['extra_opts'] = [['kernSDList']],[[30]]]
     scipy.io.savemat(filepath,save,do_compression=True)
     print("Saved file at", filepath)
 
 def save_params(filepath,params):
-    save = {'currentParams':[]}
-    save['currentParams'].append([[params.cov_type]])
-    save['currentParams'].append([[params.gamma]])
-    save['currentParams'].append([params.eps])
-    save['currentParams'].append(np.array([params.d]).T)
-    save['currentParams'].append(params.C)
-    save['currentParams'].append(params.R)
-    scipy.io.savemat(filepath,save,do_compression=True)
+    save = {}
+    save['currentParams'] = [[params.cov_type],[params.gamma],[params.eps],[params.d],params.C,params.R]
     print("Saved file at", filepath)
     
 # Load from file
@@ -159,6 +154,6 @@ def load_params(filepath):
 if __name__ == "__main__":
     print("Simulating data")
     params = load_params('em_input.mat')
-    sample_data = sample_data('RBF',params,20)
+    sample_data,save_params = sample_data('rbf',params,20)
     print(sample_data)
-    save_data('sample.mat',sample_data)
+    save_data('sample.mat',sample_data,save_params)
