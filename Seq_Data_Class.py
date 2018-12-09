@@ -16,7 +16,7 @@ class Model_Specs:
         mat_contents = sio.loadmat(path_to_mat, mat_dtype=True) # By default, data loaded as uint8 which gives errors
         data = []
         # Loop over each component of MATLAB struct
-        for i in range(mat_contents['seq'][0].size):
+        for i in range(len(mat_contents['seq'][0])):
             # Extract trial info
             trial_id = int(mat_contents['seq'][0][i][0][0][0])
             T = int(mat_contents['seq'][0][i][1][0][0])
