@@ -6,7 +6,7 @@ from extract_traj import extract_traj
 from data_simulator import load_data
 import numpy as np
 from core_gpfa.postprocess import postprocess
-from core_gpfa.plot_3d import plot_3d
+from core_gpfa.plot_3d import plot_3d, plot_1d
 
 # set random seed for reproducibility
 np.random.seed(1)
@@ -33,6 +33,7 @@ result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_di
 plot_3d(seq_train, 'x_orth', dims_to_plot=[0,1,2])
 
 # TODO plots for each dimension of trajectory
+plot_1d(seq_train, 'x_orth', result['bin_width'])
 
 # Cross-validation to find optimal state dimensionality
 # TODO

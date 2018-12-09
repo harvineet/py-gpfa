@@ -81,7 +81,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # using learned parameters
     (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, getLL=True)
 
-    result = dict({'LL':LLtrain, 'params':est_params, 'seq':seq_train})
+    result = dict({'LL':LLtrain, 'params':est_params, 'seq':seq_train, 'bin_width':bin_width})
 
     # Assess generalization performance
     # TODO
