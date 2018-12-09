@@ -12,10 +12,8 @@ def sample_data(kernel,params,time):
     #kernel: RBF or SM
     #params: type params_class()
     #time: how many independent trail class
-    
     #create a seq of tria_class
     seq = [Trial_Class(i, 20, 1, None,None) for i in range(time)]
-    
     # Load parameters
     R = params.R
     d = params.d
@@ -30,18 +28,19 @@ def sample_data(kernel,params,time):
         K = []
         Tdif = np.tile(np.arange(1,T+1).reshape((T,1)), (1, T)) - np.tile(np.arange(1,T+1), (T, 1))
         diffSq = Tdif ** 2
-        for i in range (time):
+        for i in range (p):
             const = params.eps[1]
             p = params.gamma[1] 
             temp= (1-const) * np.exp(-p / 2 * diffSq)
             Kmax = temp + const * np.identity(diffSq.shape[0])
             K.append(Kmax)
         
-    if kernel == 'SM'
+        
+    if kernel == 'SM':
         K = []
         Tdif = np.tile(np.arange(1,T+1).reshape((T,1)), (1, T)) - np.tile(np.arange(1,T+1), (T, 1))
         diffSq = Tdif ** 2
-        for i in range(time):
+        for i in range(p):
             w = params.gamma[i][:params.Q]
             m = params.gamma[i][params.Q:params.Q*2]
             v = params.gamma[i][params.Q*2:params.Q*3]
@@ -56,6 +55,7 @@ def sample_data(kernel,params,time):
         for i in range (len(K)):
             X.append (np.random.multivariate_normal(np.zeros(T),K[i],1)[0])
         X = np.array(X)
+        
         Y = []
         for i in range(len(X.T)):
             Y.append(np.random.multivariate_normal((np.dot(C,X.T[i])+d),R))
@@ -123,9 +123,11 @@ def generate_trial_data(params, K, xDim, T):
 # Save to file
 def save_data(filepath,sample_data):
     # sample_data is a seq of trial
+    # save X,Y to mat file 
     save = {}
     for i in range(len(sample_data)):
-        save[str(i)] = [sample_data[i].x,sample_data[i].y]
+        save['X' + str(i)] = sample_data[i].x
+        save['Y'+ str(i)]  = sample_data[i].y
     scipy.io.savemat(filepath,save,do_compression=True)
     print("Saved file at", filepath)
 
@@ -146,18 +148,17 @@ def load_data(filepath):
     model_data = Model_Specs()
     model_data.data_from_mat(filepath)
     data = model_data.data
-
     return data
 
 # Load parameters from mat file
 def load_params(filepath):
     params = Param_Class()
     params.params_from_mat(filepath)
-
     return params
 
 if __name__ == "__main__":
     print("Simulating data")
-    
+    params = load_params('em_input.mat')
+    sample_data = sample_data('RBF',params,20)
     print(sample_data)
     save_data('sample.mat',sample_data)
