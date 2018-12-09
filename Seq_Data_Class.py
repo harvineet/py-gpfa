@@ -24,7 +24,7 @@ class Model_Specs:
             x = mat_contents['seq'][0][i][3]
             y = mat_contents['seq'][0][i][4]
             # Store in data object and append to list
-            data.append(Trial_Class(trial_id, T, seq_id, y))
+            data.append(Trial_Class(trial_id, T, seq_id, x, y))
         self.data = data
     
     # Helper function to stack variables across trials
