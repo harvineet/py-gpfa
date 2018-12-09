@@ -88,10 +88,8 @@ def em(current_params, seq, kernSDList):
         if current_params.learnKernelParams:
 
             res = learn_GP_params(seq, current_params)
-            if current_params.cov_type == 'rbf':
-                current_params.gamma = res
-            elif current_params.cov_type == 'sm':
-                print('')
+            current_params.gamma = res
+
 
         if current_params.learnGPNoise: 
             current_params.eps = res.eps

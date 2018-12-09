@@ -9,22 +9,21 @@ def learn_GP_params(seq, current_params):
     
     isVerbose = False
 
+    oldParams = current_params.gamma.copy()
+    xDim    = len(oldParams)
+    out_params = []
+
     if current_params.cov_type == 'rbf':
-        oldParams = current_params.gamma.copy()
-        fname     = grad_betgam
-        xDim    = oldParams.size
-        out_params = np.zeros(xDim)
+        fname     = grad_rbf
+    elif current_params.cov_type == 'sm':
+        fname = grad_sm
+        
 
     precomp = makePrecomp(seq, xDim)
 
     for i in range(xDim):
 
-        const = current_params.eps[i]
-
-        if current_params.cov_type == 'rbf':
-            initp = np.log(oldParams[i])           # Single param per latent dim
-        elif current_params.cov_type == 'sm':
-            initp = np.log(oldParams[:,i])         # More than one param per latent dim
+        initp = np.log(oldParams[i])           # Single param per latent dim
 
         curr_args = {
             'Tall': precomp['Tall'][i],
@@ -34,15 +33,30 @@ def learn_GP_params(seq, current_params):
             'numTrials': precomp['numTrials'][i],
             'PautoSUM': precomp['PautoSUM'][i]
         }
-
-        res = minimize(fun = fname, 
-                       x0 = initp, 
-                       args = (curr_args, const), 
-                       method='BFGS',
-                       options={'disp': isVerbose}) 
-
         if current_params.cov_type == 'rbf':
-            out_params[i] = np.exp(res.x)
+
+            const = current_params.eps[i]
+            res = minimize(fun = fname, 
+                           x0 = initp, 
+                           args = (curr_args, const), 
+                           method='BFGS',
+                           options={'disp': isVerbose}) 
+
+            out_params.append(np.exp(res.x[0]))
+        
+        elif current_params.cov_type == 'sm':
+            Q = current_params.Q
+            # Weights must sum to 1
+            cons = ( { 'type': 'eq', 'fun': lambda x:  1 - sum(np.exp(x[:Q])) } )
+            bnds = tuple( (0,1) for x in np.exp(initp[:Q]) )
+            res = minimize(fun = fname , 
+                           x0 = initp , 
+                           args = (curr_args, Q), 
+                           method='SLSQP',
+                           bounds=bnds ,
+                           constraints=cons ,
+                           options={'disp': isVerbose}), 
+            out_params.append(np.exp(res.x).tolist())
     
     return out_params
  
@@ -92,7 +106,7 @@ def makePrecomp( seq , xDim ):
 
     return precomp
 
-def grad_betgam(p, curr_args, const):
+def grad_rbf(p, curr_args, const):
     # Cost function for squared exponential function
     # No gradient is returned
 
@@ -100,6 +114,26 @@ def grad_betgam(p, curr_args, const):
     Tmax = np.max(Tall)    
     temp         = (1-const) * np.exp(-np.exp(p) / 2 * curr_args['difSq'])
     Kmax         = temp + const * np.identity(Tmax)
+
+    T = curr_args['T'][0]
+    Kinv, logdet_K = invToeplitz(Kmax[0:T, 0:T])
+
+    f = -(- 0.5 * curr_args['numTrials'] * logdet_K - 0.5 * np.dot(curr_args['PautoSUM'].flatten(), Kinv.flatten()))
+
+    return f
+
+def grad_sm(p, curr_args, Q):
+    # Cost function for spectral mixture kernel
+    # No gradient is returned
+
+    p = np.exp(p).tolist()
+    w = p[:Q]
+    m = p[Q:Q*2]
+    v = p[Q*2:Q*3]
+    # Generate the covariance for given setting of parameters
+    Kmax = np.zeros(curr_args['difSq'].shape)
+    for i in range(Q):
+        Kmax = Kmax + w[i] * np.exp(-2 * np.pi**2 * v[i]**2 * curr_args['difSq']) * np.cos(2 * np.pi *  curr_args['Tdif'].T * m[i]) 
 
     T = curr_args['T'][0]
     Kinv, logdet_K = invToeplitz(Kmax[0:T, 0:T])

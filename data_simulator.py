@@ -62,6 +62,58 @@ def sample_data(time):
         seq.append(sample_once())
     return seq
 
+def sample_sm(T, ntrials, xDim, Q):
+    # N       - number of timesteps per trial
+    # ntrials - total number of trials to generate
+    # xDim    - dimensionality of latent space
+    # Q       - number of SM mixtures
+    
+    # Preload parameters from the mat file
+    path_to_mat = '/Users/romanhuszar/Documents/TimeSeries/project/workspace/em_input.mat'
+    params = Param_Class()
+    params.params_from_mat(path_to_mat)
+    params.Q = Q
+    param_cov_type = 'sm'
+    # Now we generate parameters of each GP
+    gamma = []
+    for i in range(xDim):
+        weights = np.random.uniform(0, 1, params.Q).tolist()
+        weights = weights / np.sum(weights)
+        weights = weights.tolist()
+        mu = np.random.uniform(0, 1, params.Q).tolist()
+        vs = np.random.uniform(0, 1, params.Q).tolist()
+        gamma.append(weights + mu + vs)
+    params.gamma = gamma
+    
+    # Generate covariance matrix for each latent dimension
+    K = []
+    Tdif = np.tile(np.arange(1,T+1).reshape((T,1)), (1, T)) - np.tile(np.arange(1,T+1), (T, 1))
+    diffSq = Tdif ** 2
+    for i in range(xDim):
+        w = params.gamma[i][:params.Q]
+        m = params.gamma[i][params.Q:params.Q*2]
+        v = params.gamma[i][params.Q*2:params.Q*3]
+        Km = np.zeros(diffSq.shape);
+        for j in range(len(w)):
+            Km = Km + w[j] * np.exp(-2 * np.pi**2 * v[j]**2 * diffSq) * np.cos(2 * np.pi *  Tdif.T * m[j]) 
+        K.append(Km)
+    
+    seq = []
+    for i in range(ntrials):
+        Y = generate_trial_data(params, K, xDim, T)
+        seq.append( Trial_Class(i, T, i, Y) )
+    
+    return params, seq
+
+def generate_trial_data(params, K, xDim, T):
+    X = np.zeros((xDim, T))
+    for i in range(xDim):
+        X[i,:] = np.random.multivariate_normal( np.zeros(T), K[i] )
+    Y = np.zeros((params.C.shape[0], T))
+    for i in range(T):  
+        Y[:,i] = np.random.multivariate_normal( np.matmul(params.C, X[:,i]) + params.d, params.R)
+    return Y
+
 # Save to file
 def save_data(filepath,sample_data):
     # TODO

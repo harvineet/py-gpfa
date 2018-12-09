@@ -30,13 +30,25 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
 
     # Initialize state model parameters
     param_cov_type = 'rbf'
-    # GP timescale
-    # Assume binWidth is the time step size.
-    param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
-    # GP noise variance
-    param_eps = start_eps * np.ones((x_dim,))
-    
-    kernSDList = 30
+
+    # Initialize GP params
+    if param_cov_type == 'rbf':
+        param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
+        param_eps = start_eps * np.ones((x_dim,))       # GP noise variance
+        kernSDList = 30
+        Q = None
+
+    elif param_cov_type == 'sm':
+        param_gamma = []
+        for i in range(x_dim):
+            weights = np.random.uniform(0, 1, 3).tolist()
+            weights = weights / np.sum(weights)
+            weights = weights.tolist()
+            mu = np.random.uniform(0, 1, params.Q).tolist()
+            vs = np.random.uniform(0, 1, params.Q).tolist()
+            param_gamma.append(weights + mu + vs)
+            Q = 3
+
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
@@ -58,7 +70,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     current_params = Param_Class(param_cov_type, param_gamma, 
                                     param_eps, param_d, param_C, param_R,
                                     param_notes_learnKernelParams, param_notes_learnGPNoise,
-                                    param_notes_RforceDiagonal)
+                                    param_notes_RforceDiagonal, Q)
 
     # Fit model parameters
     print('\nFitting GPFA model\n')
