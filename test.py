@@ -2,7 +2,7 @@ from tests.test_inference import test_inference, test_orthonormalize
 from tests.test_em import test_em
 from data_simulator import load_data
 from Seq_Data_Class import Param_Class
-from core_gpfa.plot_3d import plot_3d, plot_1d
+from core_gpfa.plot_3d import plot_3d, plot_1d, plot_1d_error
 
 if __name__ == "__main__":
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     print("xsm", seq[0].xsm)
 
     # Test for orthonormalization
-    est_params, seq = test_orthonormalize(LL, params, seq)
+    est_params, seq, _ = test_orthonormalize(LL, params, seq)
 
     print("x_orth", seq[0].x_orth)
     print("C_orth", est_params.C_orth)
@@ -34,3 +34,6 @@ if __name__ == "__main__":
 
     # Test for 1d plot
     plot_1d(seq, 'x_orth', bin_width=20)
+
+    # Test error plot
+    plot_1d_error(seq, 'x_orth', bin_width=20)

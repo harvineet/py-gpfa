@@ -10,7 +10,6 @@ def test_inference(seq, params):
 
 def test_orthonormalize(LL, params, seq):
     
-    result = dict({'LL':LL, 'params':params, 'seq':seq})
-    (est_params, seq_train) = postprocess(result, method='gpfa', kern_SD=30)
+    (est_params, seq_train, seq_test) = postprocess(params, seq, [], method='gpfa', kern_SD=30)
 
-    return est_params, seq_train
+    return est_params, seq_train, seq_test
