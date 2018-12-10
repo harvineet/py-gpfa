@@ -69,6 +69,7 @@ class Param_Class():
         self.d = param_d
         self.C = param_C
         self.R = param_R
+        self.Q = param_q
         self.learnKernelParams = param_notes_learnKernelParams
         self.learnGPNoise = param_notes_learnGPNoise
         self.RforceDiagonal = param_notes_RforceDiagonal
