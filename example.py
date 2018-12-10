@@ -13,9 +13,9 @@ np.random.seed(1)
 
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
-INPUT_FILE = '../sample.mat' # '../em_input.mat'
+INPUT_FILE = '../em_input_new.mat' # '../sample.mat'
 
-x_dim = 3 # latent dimension
+x_dim = 8 # latent dimension
 method = 'gpfa'
 kern_SD = 30
 
