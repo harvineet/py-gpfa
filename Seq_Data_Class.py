@@ -61,8 +61,8 @@ class Trial_Class:
 class Param_Class():
     def __init__(self, param_cov_type=None, param_gamma=None, 
                     param_eps=None, param_d=None, param_C=None, param_R=None,
-                    param_notes_learnKernelParams=None, param_notes_learnGPNoise=None,
-                    param_notes_RforceDiagonal=None,param_q=None):
+                    param_notes_learnKernelParams=True, param_notes_learnGPNoise=False,
+                    param_notes_RforceDiagonal=True,param_q=3):
         self.cov_type = param_cov_type
         self.gamma = param_gamma
         self.eps = param_eps

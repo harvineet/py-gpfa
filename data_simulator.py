@@ -8,14 +8,14 @@ import scipy
 
 # Simulate
 #input how many times you want to sample
-def params_class_generator(x_dim,y_dim,kernel):
+def rand_params_generator(x_dim,y_dim,kernel):
     
     if kernel == 'rbf':
         param_eps = 1e-3 * np.ones((x_dim,)) 
         param_gamma = np.random.uniform(0,1, x_dim).tolist()
+        Q = 0
     
-    
-    if kernel == 'sm':    
+    elif kernel == 'sm':    
         param_gamma = []
         for i in range(x_dim): 
             weights = np.random.uniform(0, 1, 3).tolist()
@@ -29,8 +29,6 @@ def params_class_generator(x_dim,y_dim,kernel):
     param_R  = np.abs( np.random.normal(0,1, y_dim) )
     param_d = np.random.normal(loc=0.0, scale=1.0, size=(y_dim,)) 
     return Param_Class(kernel,param_gamma,param_eps,param_d,param_C,param_R,param_q=Q)
-
-
 
 
     
