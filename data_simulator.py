@@ -32,18 +32,18 @@ def rand_params_generator(x_dim,y_dim,kernel):
 
 
     
-def sample_data(kernel,params,time):
+def sample_data(kernel, params, num_trials, trial_length):
     #kernel: RBF or SM
     #params: type params_class()
     #time: how many independent trail class
     #create a seq of tria_class
-    seq = [Trial_Class(i, 20, 1, None,None) for i in range(time)]
+    seq = [Trial_Class(i, 20, 1, None,None) for i in range(num_trials)]
     # Load parameters
     R = params.R
     d = params.d
     C = params.C
     sigma_n = params.eps
-    T = 20
+    T = trial_length
     q = C.shape[0]
     p = C.shape[1]
     
@@ -87,7 +87,7 @@ def sample_data(kernel,params,time):
         return X,Y
     
     #adding X,Y to trial in the seq    
-    for i in range (time):
+    for i in range (num_trials):
         seq[i].x, seq[i].y = sample_once()
     return seq, params
 
