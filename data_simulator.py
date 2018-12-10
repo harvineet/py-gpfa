@@ -8,7 +8,32 @@ import scipy
 
 # Simulate
 #input how many times you want to sample
+def params_class_generator(x_dim,y_dim,kernel):
+    
+    if kernel == 'rbf':
+        param_eps = 1e-3 * np.ones((x_dim,)) 
+        param_gamma = np.random.uniform(0,1, x_dim).tolist()
+    
+    
+    if kernel == 'sm':    
+        param_gamma = []
+        for i in range(x_dim): 
+            weights = np.random.uniform(0, 1, 3).tolist()
+            weights = weights / np.sum(weights)
+            weights = weights.tolist()
+            mu = np.random.uniform(0, 1, Q).tolist()
+            vs = np.random.uniform(0, 1, Q).tolist()
+            param_gamma.append(weights + mu + vs)
+            Q = 3
+    param_C  = np.random.normal(loc=0.0, scale=1.0, size=(y_dim, x_dim)) 
+    param_R  = np.abs( np.random.normal(0,1, y_dim) )
+    param_d = np.random.normal(loc=0.0, scale=1.0, size=(y_dim,)) 
+    return Param_Class(kernel,param_gamma,param_eps,param_d,param_C,param_R,param_q=Q)
 
+
+
+
+    
 def sample_data(kernel,params,time):
     #kernel: RBF or SM
     #params: type params_class()
@@ -154,7 +179,7 @@ def load_params(filepath):
 
 if __name__ == "__main__":
     print("Simulating data")
-    params = load_params('../em_input.mat')
-    sample_data,save_params = sample_data('rbf',params,56)
+    params = load_params('em_input.mat')
+    sample_data,save_params = sample_data('sm',params,56)
     print(sample_data)
-    save_data('../sample.mat',sample_data,save_params)
+    save_data('sample_sm.mat',sample_data,save_params)
