@@ -8,6 +8,7 @@ import scipy
 
 # Simulate
 #input how many times you want to sample
+
 def sample_data(kernel,params,time):
     #kernel: RBF or SM
     #params: type params_class()
@@ -124,9 +125,9 @@ def generate_trial_data(params, K, xDim, T):
 def save_data(filepath,sample_data,params):
     # sample_data is a seq of trial
     # save X,Y to mat file 
-    save = {'seq':[]}
+    save = {'seq':[[]]}
     for i in range (len(sample_data)):
-        save['seq'].append([[[[sample_data[i].trial_id]],[[sample_data[i].T]],[[sample_data[i].seq_id]],sample_data[i].x,sample_data[i].y]])
+        save['seq'][0].append([[[sample_data[i].trial_id]],[[sample_data[i].T]],[[sample_data[i].seq_id]],sample_data[i].x,sample_data[i].y])
     save['currentParams'] = [[[[params.cov_type],[params.gamma],[params.eps],[params.d],params.C,params.R]]]
     #save['extra_opts'] = [['kernSDList']],[[30]]]
     scipy.io.savemat(filepath,save,do_compression=True)
@@ -154,6 +155,6 @@ def load_params(filepath):
 if __name__ == "__main__":
     print("Simulating data")
     params = load_params('em_input.mat')
-    sample_data,save_params = sample_data('rbf',params,20)
+    sample_data,save_params = sample_data('rbf',params,56)
     print(sample_data)
     save_data('sample.mat',sample_data,save_params)
