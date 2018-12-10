@@ -21,7 +21,7 @@ def mean_squared_error(seq):
 
     return mean_error_trials
 
-def extract_traj(output_dir, data, method='gpfa', x_dim=3):
+def extract_traj(output_dir, data, method='gpfa', x_dim=3, param_cov_type='rbf'):
     
     bin_width = 20 # in msec # NOT REQUIRED
     num_folds = 2 # number of splits (>= 2), set 0 for using all train data
@@ -89,7 +89,7 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
         # Call gpfa
         result = None
         result = gpfa_engine(seq_train=seq_train, seq_test=seq_test, fname=output_file,
-            x_dim=x_dim, bin_width=bin_width, min_var_frac=min_var_frac)
+            x_dim=x_dim, bin_width=bin_width, param_cov_type=param_cov_type, min_var_frac=min_var_frac)
 
     # Returns result of the last run fold
     return result

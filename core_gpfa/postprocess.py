@@ -52,7 +52,6 @@ def postprocess(est_params, seq_train, seq_test, method, kern_SD):
 
         est_params.C_orth = C_orth
 
-        # TODO Orthonormalize seq_test
         if len(seq_test)>0:
             (seq_test, LLtest) = exact_inference_with_LL(seq_test, est_params)
             X  = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq_test], 1)

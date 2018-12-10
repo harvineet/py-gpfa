@@ -17,6 +17,7 @@ INPUT_FILE = '../em_input_new.mat' # '../sample.mat'
 
 x_dim = 8 # latent dimension
 method = 'gpfa'
+param_cov_type = 'rbf'
 kern_SD = 30
 
 # Load data
@@ -24,7 +25,7 @@ kern_SD = 30
 dat = load_data(INPUT_FILE)
 
 # Extract trajectories
-result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_dim)
+result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_dim, param_cov_type=param_cov_type)
 
 # Orthonormalize trajectories
 # Returns results for the last run cross-validation fold, if enabled
