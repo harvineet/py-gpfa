@@ -15,7 +15,7 @@ RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
 INPUT_FILE = '../sample.mat' # '../em_input.mat'
 
-x_dim = 3 # latent dimention
+x_dim = 3 # latent dimension
 method = 'gpfa'
 kern_SD = 30
 

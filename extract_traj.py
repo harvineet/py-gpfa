@@ -2,6 +2,7 @@
 
 import os
 from core_gpfa.gpfa_engine import gpfa_engine
+import numpy as np
 # import copy # CHECK if required
 
 def extract_traj(output_dir, data, method='gpfa', x_dim=3):
@@ -22,8 +23,8 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     f_div = np.floor(np.linspace(0, N, num_folds+1))
 
     for cvf in range(num_folds):
-        # cvf=0 runs on all data as training set
         # TODO cvf=1 runs on all data as testing set
+        # cvf=0 runs on all data as training set
         if cvf==0:
             print("Training on all data")    
             # seq_train = data # TODO, change to numpy.array
@@ -53,9 +54,9 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
         # Check if training data covariance is full rank
         # TODO
 
-        print('Number of trials in training: %d\n', len(seq_train));
-        print('Number of trials in testing: %d\n', len(seq_test));
-        print('Dimensionality of latent space: %d\n', x_dim);
+        print('Number of trials in training: %d\n' % len(seq_train));
+        print('Number of trials in testing: %d\n' % len(seq_test));
+        print('Dimensionality of latent space: %d\n' % x_dim);
 
         # If doing cross-validation, don't use private noise variance floor
         # TODO, set minVarFrac and pass to gpfa_engine

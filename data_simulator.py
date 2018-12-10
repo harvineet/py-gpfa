@@ -153,7 +153,7 @@ def load_params(filepath):
 
 if __name__ == "__main__":
     print("Simulating data")
-    params = load_params('em_input.mat')
-    sample_data,save_params = sample_data('rbf',params,20)
+    params = load_params('../em_input.mat')
+    sample_data,save_params = sample_data('rbf',params,56)
     print(sample_data)
-    save_data('sample.mat',sample_data,save_params)
+    save_data('../sample.mat',sample_data,save_params)
