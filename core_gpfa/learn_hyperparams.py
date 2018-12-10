@@ -47,16 +47,18 @@ def learn_GP_params(seq, current_params):
         elif current_params.cov_type == 'sm':
             Q = current_params.Q
             # Weights must sum to 1
-            cons = ( { 'type': 'eq', 'fun': lambda x:  1 - sum(np.exp(x[:Q])) } )
-            bnds = tuple( (0,1) for x in np.exp(initp[:Q]) )
+            wbound = tuple((-10, 0) for _ in range(Q))
+            gaussbound = tuple((None, None) for _ in range(Q*2))
+            bnds = wbound + gaussbound
             res = minimize(fun = fname , 
                            x0 = initp , 
                            args = (curr_args, Q), 
-                           method='SLSQP',
+                           method='L-BFGS-B',
                            bounds=bnds ,
-                           constraints=cons ,
                            options={'disp': isVerbose}), 
-            out_params.append(np.exp(res.x).tolist())
+            res = np.exp(res[0].x)
+            res[:Q] = res[:Q] / np.sum(res[:Q])
+            out_params.append(res.tolist())
     
     return out_params
  
@@ -127,7 +129,8 @@ def grad_sm(p, curr_args, Q):
     # No gradient is returned
 
     p = np.exp(p).tolist()
-    w = p[:Q]
+    # Force weights to sum to 1
+    w = (p[:Q] / np.sum(p[:Q])).tolist()
     m = p[Q:Q*2]
     v = p[Q*2:Q*3]
     # Generate the covariance for given setting of parameters
