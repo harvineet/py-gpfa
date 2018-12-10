@@ -34,14 +34,13 @@ def learn_GP_params(seq, current_params):
             'PautoSUM': precomp['PautoSUM'][i]
         }
         if current_params.cov_type == 'rbf':
-
+            
             const = current_params.eps[i]
             res = minimize(fun = fname, 
                            x0 = initp, 
                            args = (curr_args, const), 
                            method='BFGS',
                            options={'disp': isVerbose}) 
-
             out_params.append(np.exp(res.x[0]))
         
         elif current_params.cov_type == 'sm':
