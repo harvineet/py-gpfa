@@ -89,4 +89,61 @@ def plot_1d(seq, xspec='x_orth', bin_width=20):
     
     plt.show()
 
+# Uncertainty plots based on code by Martin Krasser https://github.com/krasserm
+# Source https://github.com/krasserm/bayesian-machine-learning/blob/master/gaussian_processes_util.py
+def plot_1d_error(seq, xspec='x_orth', bin_width=20):
+    # Plot prediction for each latent dimension over time
+
+    n_plot_max = 5
+    red_trials = [] # TODO
+
+    n_cols = 4
+
+    fig = plt.figure()
+    ax = fig.gca()
+
+    X_all = np.concatenate([getattr(trial, xspec) for trial in seq], 1)
+    x_max = np.ceil(10 * np.max(np.abs(X_all))) / 10
+
+    T_max = np.max([trial.T for trial in seq])
+    xtk_step = np.ceil(T_max/25.0) * 5
+    xtk = np.arange(0, T_max, xtk_step)
+    xtkl = np.arange(0, (T_max-1)*bin_width+1, xtk_step*bin_width)
+    ytk = [-x_max, 0, x_max]
+
+    n_rows = int(np.ceil(X_all.shape[0]*1.0 / n_cols))
+
+    for k in range(X_all.shape[0]):
+        ax = plt.subplot(n_rows, n_cols, k+1)
+
+        for n in range(min(len(seq), n_plot_max)):
+            dat = getattr(seq[n], xspec)
+            T = seq[n].T
+            var = seq[n].Vsm[k,k,:] # CHECK if correct
+            error_bar = 2 * np.sqrt(var) # CHECK if correct
+            # error_bar = 2 * np.sqrt(np.diag(var)) # CHECK if correct
+
+            # Plot error
+            ax.fill_between(range(T), dat[k,:] + error_bar, dat[k,:] - error_bar, alpha=0.1)
+
+            # Plot mean
+            ax.plot(range(T), dat[k,:], linewidth=1, color='grey', label='Predicted mean')
+
+            # Plot actual
+            ax.plot(range(T), seq[n].x[k,:], marker='x', linewidth=1, color='red')
+
+        ax.set_xlim([0, T_max])
+        ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])
+
+        # Source: https://matplotlib.org/users/usetex.html
+        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=14)
+
+        ax.set_xticks(xtk)
+        ax.set_xticklabels(xtkl)
+
+        ax.set_yticks(ytk)
+        ax.set_yticklabels(ytk)
         
+        ax.set_xlabel('Time')
+    
+    plt.show()

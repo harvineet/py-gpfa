@@ -1,6 +1,7 @@
 # Orthonormalize trajectories to visualize
 
 import numpy as np
+from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
 
 def orthogonalize(X, C):
     """
@@ -42,14 +43,8 @@ def segment_by_trial(seq, X, fn):
 
     return seq
 
-def postprocess(result, method, kern_SD):
-    
-    seq_train = None
-    est_params = None
-
+def postprocess(est_params, seq_train, seq_test, method, kern_SD):
     if method=='gpfa':
-        seq_train = result['seq']
-        est_params = result['params']
         C = est_params.C
         X  = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq_train], 1)
         (X_orth, C_orth, _)  = orthogonalize(X, C)
@@ -58,7 +53,12 @@ def postprocess(result, method, kern_SD):
         est_params.C_orth = C_orth
 
         # TODO Orthonormalize seq_test
+        if len(seq_test)>0:
+            (seq_test, LLtest) = exact_inference_with_LL(seq_test, est_params)
+            X  = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq_test], 1)
+            (X_orth, C_orth, _)  = orthogonalize(X, C)
+            seq_test = segment_by_trial(seq_test, X_orth, 'x_orth')
     else:
         pass
 
-    return est_params, seq_train
+    return est_params, seq_train, seq_test

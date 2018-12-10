@@ -13,7 +13,7 @@ def cut_trials(seq_train, seg_length=20):
     return seq_train
 
 def save_results(fname, result):
-    # Saving a dict with keys: 'LL', 'params' and 'seq'
+    # Saving a dict with keys: 'LL', 'params', 'seq_train' and 'seq_test'
     sio.savemat(fname, mdict=result, format='5')
 
 def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
@@ -81,10 +81,15 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # using learned parameters
     (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, getLL=True)
 
-    result = dict({'LL':LLtrain, 'params':est_params, 'seq':seq_train, 'bin_width':bin_width})
-
     # Assess generalization performance
     # TODO
+
+    LLtest = np.nan
+    if len(seq_test)>0:
+        (_, LLtest) = exact_inference_with_LL(seq_test, est_params, getLL=True)
+
+    result = dict({'LLtrain':LLtrain, 'LLtest':LLtest, 'params':est_params, 'seq_train':seq_train,\
+                 'seq_test':seq_test, 'bin_width':bin_width})
 
     # Save results
     save_results(fname, result)
