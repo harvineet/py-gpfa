@@ -42,7 +42,7 @@ class Model_Specs:
             
 
 class Trial_Class:
-    def __init__(self, trial_id, T, seq_id, y,x):
+    def __init__(self, trial_id, T, seq_id, x,y):
         self.trial_id = trial_id
         self.T = T
         self.seq_id = seq_id
@@ -54,25 +54,25 @@ class Trial_Class:
 
     # Function to print objects
     def __repr__(self):
-        return("(Trial id: %d, T: %d, seq id: %d, y: %s)" \
-                    % (self.trial_id, self.T, self.seq_id, np.array_repr(self.y)))
+        return("(Trial id: %d, T: %d, seq id: %d,x: %s, y: %s)" \
+                    % (self.trial_id, self.T, self.seq_id, np.array_repr(self.x),np.array_repr(self.y)))
 
 # This gives the user flexibility to declare parameters, or load them from elsewhere
 class Param_Class():
     def __init__(self, param_cov_type=None, param_gamma=None, 
                     param_eps=None, param_d=None, param_C=None, param_R=None,
                     param_notes_learnKernelParams=None, param_notes_learnGPNoise=None,
-                    param_notes_RforceDiagonal=None, param_Q=None):
+                    param_notes_RforceDiagonal=None,param_q=None):
         self.cov_type = param_cov_type
         self.gamma = param_gamma
         self.eps = param_eps
         self.d = param_d
         self.C = param_C
         self.R = param_R
+        self.Q = param_q
         self.learnKernelParams = param_notes_learnKernelParams
         self.learnGPNoise = param_notes_learnGPNoise
         self.RforceDiagonal = param_notes_RforceDiagonal
-        self.Q = param_Q
     
     # Load model parameters from a .mat file
     def params_from_mat(self, path_to_mat):
