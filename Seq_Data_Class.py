@@ -62,7 +62,7 @@ class Param_Class():
     def __init__(self, param_cov_type=None, param_gamma=None, 
                     param_eps=None, param_d=None, param_C=None, param_R=None,
                     param_notes_learnKernelParams=None, param_notes_learnGPNoise=None,
-                    param_notes_RforceDiagonal=None):
+                    param_notes_RforceDiagonal=None, param_Q=None):
         self.cov_type = param_cov_type
         self.gamma = param_gamma
         self.eps = param_eps
@@ -72,6 +72,7 @@ class Param_Class():
         self.learnKernelParams = param_notes_learnKernelParams
         self.learnGPNoise = param_notes_learnGPNoise
         self.RforceDiagonal = param_notes_RforceDiagonal
+        self.Q = param_Q
     
     # Load model parameters from a .mat file
     def params_from_mat(self, path_to_mat):
