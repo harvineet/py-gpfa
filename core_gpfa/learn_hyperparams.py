@@ -46,7 +46,7 @@ def learn_GP_params(seq, current_params):
         elif current_params.cov_type == 'sm':
             Q = current_params.Q
             # Weights must sum to 1
-            wbound = tuple((-10, 0) for _ in range(Q))
+            wbound = tuple((-10, None) for _ in range(Q))
             gaussbound = tuple((None, None) for _ in range(Q*2))
             bnds = wbound + gaussbound
             res = minimize(fun = fname , 
@@ -129,7 +129,8 @@ def grad_sm(p, curr_args, Q):
 
     p = np.exp(p).tolist()
     # Force weights to sum to 1
-    w = (p[:Q] / np.sum(p[:Q])).tolist()
+    # w = (p[:Q] / np.sum(p[:Q])).tolist()
+    w = p[:Q]
     m = p[Q:Q*2]
     v = p[Q*2:Q*3]
     # Generate the covariance for given setting of parameters

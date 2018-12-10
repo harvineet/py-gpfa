@@ -36,7 +36,6 @@ def em(current_params, seq, kernSDList, minVarFrac):
 
         # Time each iteration
         tic = timeit.default_timer()
-        print('EM iteration', i+1,'of', emMaxIters)
     
         if np.remainder(i+1,freqLL) == 0 or i <= 1:
             getLL = True
