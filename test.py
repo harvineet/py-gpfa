@@ -7,7 +7,7 @@ from core_gpfa.plot_3d import plot_3d, plot_1d, plot_1d_error
 if __name__ == "__main__":
 
     # Load data, params from sample file
-    INPUT_FILE = '../em_input_new.mat'
+    INPUT_FILE = '../fake_data_w_genparams.mat' # '../em_input_new.mat'
     seq = load_data(INPUT_FILE)
     params = Param_Class()
     params.params_from_mat(INPUT_FILE)

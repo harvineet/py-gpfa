@@ -17,7 +17,7 @@ def save_results(fname, result):
     sio.savemat(fname, mdict=result, format='5')
 
 def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rbf',
-    start_tau=100, start_eps=1e-3, min_var_frac=0.01):
+    param_Q = 3, start_tau=100, start_eps=1e-3, min_var_frac=0.01):
     # seq_train - array with 3 tuples of -
     #   trialId (1 x 1)   - unique trial identifier
     #   y (# neurons x T) - neural data
@@ -30,11 +30,12 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
 
     # Initialize state model parameters
     # Initialize GP params
+    Q = param_Q
+
     if param_cov_type == 'rbf':
         param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
         param_eps = start_eps * np.ones((x_dim,))       # GP noise variance
         kernSDList = 30
-        Q = 1
 
     elif param_cov_type == 'sm':
         param_gamma = []
@@ -45,7 +46,6 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
             mu = np.random.uniform(0, 1, params.Q).tolist()
             vs = np.random.uniform(0, 1, params.Q).tolist()
             param_gamma.append(weights + mu + vs)
-            Q = 3
 
 
     # Initialize observation model parameters
