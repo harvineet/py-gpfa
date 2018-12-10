@@ -8,8 +8,9 @@ import numpy as np
 def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     
     bin_width = 20 # in msec # NOT REQUIRED
-    num_folds = 1 # number of splits, set 1 for using all train data
-    
+    num_folds = 0 # number of splits, set 0 for using all train data
+    min_var_frac = 0.01 # used in em
+
     # Create results directory if not exists
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -18,19 +19,16 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
     # NOT REQUIRED, check input data format
 
     # Divide data into cross-validation train and test folds
-    # TODO, crossvalidation folds
     N = len(data)
     f_div = np.floor(np.linspace(0, N, num_folds+1))
 
-    for cvf in range(num_folds):
+    for cvf in range(num_folds+1):
         # TODO cvf=1 runs on all data as testing set
         # cvf=0 runs on all data as training set
         if cvf==0:
-            print("Training on all data")    
-            # seq_train = data # TODO, change to numpy.array
-            # seq_test = [] # TODO, change to numpy.array
+            print("Training on all data\n")
         else:
-            print("Cross-validation fold %d of %d" % (cvf, num_folds))
+            print("Cross-validation fold %d of %d\n" % (cvf, num_folds))
         
         test_mask = np.zeros(N, dtype=bool)
         if cvf > 0:
@@ -47,7 +45,7 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
         test_trial_idx  = tr[test_mask]
         seq_train = [data[trial_num] for trial_num in train_trial_idx] # CHECK if copy.deepcopy() required
         seq_test = [data[trial_num] for trial_num in test_trial_idx]
-        print(len(seq_train), len(seq_test))
+
         # Remove inactive units based on training set
         # TODO
 
@@ -56,10 +54,16 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
 
         print('Number of trials in training: %d\n' % len(seq_train));
         print('Number of trials in testing: %d\n' % len(seq_test));
-        print('Dimensionality of latent space: %d\n' % x_dim);
+        print('Dimensionality of latent space: %d' % x_dim);
+
+        if len(seq_train)==0:
+            print("No examples in training set. Exiting from current cross-validation run")
+            continue
 
         # If doing cross-validation, don't use private noise variance floor
         # TODO, set minVarFrac and pass to gpfa_engine
+        if cvf > 0:
+            min_var_frac = -np.inf
 
         # Name of results file
         output_file = output_dir+"/"+method+"_xdim_"+str(x_dim)
@@ -69,6 +73,6 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3):
         # Call gpfa
         result = None
         result = gpfa_engine(seq_train=seq_train, seq_test=seq_test, fname=output_file,
-            x_dim=x_dim, bin_width=bin_width)
+            x_dim=x_dim, bin_width=bin_width, min_var_frac=min_var_frac)
 
     return result

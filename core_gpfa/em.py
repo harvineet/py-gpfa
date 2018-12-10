@@ -15,13 +15,10 @@ import timeit
     # est_params, seq_train_cut, LLcut, iter_time
     return params, seq, None, None"""
 
-def em(current_params, seq, kernSDList):
-    # TODO Change model to est_params, seq
-    # current_params = load_params('../em_input.mat')
+def em(current_params, seq, kernSDList, minVarFrac):
     
     emMaxIters = 500
     tol        = 1e-8
-    minVarFrac = 0.01
     verbose    = True
     freqLL     = 10 
 

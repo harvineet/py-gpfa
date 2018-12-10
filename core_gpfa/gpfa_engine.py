@@ -17,7 +17,7 @@ def save_results(fname, result):
     sio.savemat(fname, mdict=result, format='5')
 
 def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
-    start_tau=100, start_eps=1e-3):
+    start_tau=100, start_eps=1e-3, min_var_frac=0.01):
     # seq_train - array with 3 tuples of -
     #   trialId (1 x 1)   - unique trial identifier
     #   y (# neurons x T) - neural data
@@ -75,7 +75,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width,
     # Fit model parameters
     print('\nFitting GPFA model\n')
   
-    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList)
+    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList, min_var_frac)
 
     # Extract trajectories for original, unsegmented trials
     # using learned parameters
