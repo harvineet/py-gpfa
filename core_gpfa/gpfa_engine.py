@@ -53,9 +53,9 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
 
     print('\nRunning FA model for initialization\n')
 
-    (fa_params_L, fa_params_Ph, faLL) = fastfa(y_all, x_dim) # TODO Fast FA
+    fa_params_L, fa_params_Ph, fa_params_d, _ = fastfa(y_all, x_dim) # TODO Fast FA
 
-    param_d = np.mean(y_all, 1, keepdims=True)
+    param_d = fa_params_d
     param_C = fa_params_L # TODO faParams.L
     param_R = np.diag(fa_params_Ph) # TODO diag(faParams.Ph)
 
