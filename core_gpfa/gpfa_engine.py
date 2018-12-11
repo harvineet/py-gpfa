@@ -30,23 +30,22 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
 
     # Initialize state model parameters
     # Initialize GP params
-    Q = param_Q
+
+    param_eps = start_eps * np.ones((x_dim,))       # GP noise variance
+    kernSDList = 30
 
     if param_cov_type == 'rbf':
         param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
-        param_eps = start_eps * np.ones((x_dim,))       # GP noise variance
-        kernSDList = 30
 
     elif param_cov_type == 'sm':
         param_gamma = []
         for i in range(x_dim):
-            weights = np.random.uniform(0, 1, 3).tolist()
+            weights = np.ones(param_Q).tolist()
             weights = weights / np.sum(weights)
             weights = weights.tolist()
-            mu = np.random.uniform(0, 1, params.Q).tolist()
-            vs = np.random.uniform(0, 1, params.Q).tolist()
+            mu = np.random.uniform(0, 1, param_Q).tolist()
+            vs = np.random.uniform(0, 1, param_Q).tolist()
             param_gamma.append(weights + mu + vs)
-
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
@@ -65,10 +64,11 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
     param_notes_learnGPNoise      = False
     param_notes_RforceDiagonal    = True
 
+    # TODO Separate params for rbf and sm
     current_params = Param_Class(param_cov_type, param_gamma, 
                                     param_eps, param_d, param_C, param_R,
                                     param_notes_learnKernelParams, param_notes_learnGPNoise,
-                                    param_notes_RforceDiagonal, Q)
+                                    param_notes_RforceDiagonal, param_Q)
 
     # Fit model parameters
     print('\nFitting GPFA model\n')

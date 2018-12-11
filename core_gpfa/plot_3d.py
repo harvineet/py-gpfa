@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 mpl.rcParams['legend.fontsize'] = 10
+mpl.rcParams['figure.figsize'] = [10, 6]
+# mpl.rcParams['figure.dpi'] = 300
 plt.rc('text', usetex=True)
 
-def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2]):
+def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_3d.pdf'):
 
     n_plot_max = 20
     red_trials = [] # TODO
@@ -23,9 +25,9 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2]):
         ax.plot(dat[0,:], dat[1,:], dat[2,:], color='grey', marker='.', markersize=4)
 
     # Source: https://matplotlib.org/users/usetex.html
-    ax.set_xlabel(r'$\tilde{x}_{1,:}$', fontsize=24)
-    ax.set_ylabel(r'$\tilde{x}_{2,:}$', fontsize=24)
-    ax.set_zlabel(r'$\tilde{x}_{3,:}$', fontsize=24)
+    ax.set_xlabel(r'$\tilde{x}_{1,:}$', fontsize=18)
+    ax.set_ylabel(r'$\tilde{x}_{2,:}$', fontsize=18)
+    ax.set_zlabel(r'$\tilde{x}_{3,:}$', fontsize=18)
 
     # Written by Remy F (https://stackoverflow.com/users/1840524/remy-f)
     # Source: https://stackoverflow.com/questions/13685386/matplotlib-equal-unit-length-with-equal-aspect-ratio-z-axis-is-not-equal-to
@@ -40,9 +42,11 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2]):
     for xb, yb, zb in zip(Xb, Yb, Zb):
        ax.plot([xb], [yb], [zb], 'w')
 
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(output_file+'_plot_3d.pdf', transparent=True)
+    plt.show(block=False)
 
-def plot_1d(seq, xspec='x_orth', bin_width=20):
+def plot_1d(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d.pdf'):
     # Plot each latent dimension over time
 
     n_plot_max = 20
@@ -77,7 +81,7 @@ def plot_1d(seq, xspec='x_orth', bin_width=20):
         ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])
 
         # Source: https://matplotlib.org/users/usetex.html
-        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=14)
+        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=18)
 
         ax.set_xticks(xtk)
         ax.set_xticklabels(xtkl)
@@ -87,11 +91,13 @@ def plot_1d(seq, xspec='x_orth', bin_width=20):
         
         ax.set_xlabel('Time')
     
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(output_file+'_plot_1d.pdf', transparent=True)
+    plt.show(block=False)
 
 # Uncertainty plots based on code by Martin Krasser https://github.com/krasserm
 # Source https://github.com/krasserm/bayesian-machine-learning/blob/master/gaussian_processes_util.py
-def plot_1d_error(seq, xspec='x_orth', bin_width=20):
+def plot_1d_error(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d_error.pdf'):
     # Plot prediction for each latent dimension over time
 
     n_plot_max = 5
@@ -119,15 +125,17 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20):
         for n in range(min(len(seq), n_plot_max)):
             dat = getattr(seq[n], xspec)
             T = seq[n].T
+            
+            pred_mean = np.squeeze(np.asarray(dat[k,:])) # dat is originally in matrix format. Can also use np.ravel(dat[k,:])
+
             var = seq[n].Vsm[k,k,:] # CHECK if correct
             error_bar = 2 * np.sqrt(var) # CHECK if correct
             # error_bar = 2 * np.sqrt(np.diag(var)) # CHECK if correct
-
             # Plot error
-            ax.fill_between(range(T), dat[k,:] + error_bar, dat[k,:] - error_bar, alpha=0.1)
+            ax.fill_between(range(T), pred_mean + error_bar, pred_mean - error_bar, alpha=0.1)
 
             # Plot mean
-            ax.plot(range(T), dat[k,:], linewidth=1, color='grey', label='Predicted mean')
+            ax.plot(range(T), pred_mean, linewidth=1, color='grey', label='Predicted mean')
 
             # Plot actual
             ax.plot(range(T), seq[n].x[k,:], marker='x', linewidth=1, color='red')
@@ -136,7 +144,7 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20):
         ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])
 
         # Source: https://matplotlib.org/users/usetex.html
-        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=14)
+        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=18)
 
         ax.set_xticks(xtk)
         ax.set_xticklabels(xtkl)
@@ -146,4 +154,6 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20):
         
         ax.set_xlabel('Time')
     
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(output_file+'_plot_1d_error.pdf', transparent=True)
+    plt.show(block=False)

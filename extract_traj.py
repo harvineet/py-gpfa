@@ -6,13 +6,14 @@ import numpy as np
 # import copy # CHECK if required
 
 # Mean squared error between actual and predicted latent trajectories
-def mean_squared_error(seq):
+def mean_squared_error(seq, xspec='xsm'):
     error_trials = np.zeros(len(seq))
     for n in range(len(seq)):
         x_dim = (seq[n].xsm).shape[0]
         T = seq[n].T
+        pred = getattr(seq[n], xspec)
         # Frobenius norm
-        error = np.sum(np.power(seq[n].xsm - seq[n].x, 2))
+        error = np.sum(np.power(pred - seq[n].x, 2))
         # Normalize by x_dim*T
         error = error * 1.0 / (x_dim * T)
         error_trials[n] = error
@@ -82,7 +83,7 @@ def extract_traj(output_dir, data, method='gpfa', x_dim=3, param_cov_type='rbf',
             min_var_frac = -np.inf
 
         # Name of results file
-        output_file = output_dir+"/"+method+"_xdim_"+str(x_dim)
+        output_file = output_dir+"/"+method+"_xdim_"+str(x_dim)+"_cov_"+param_cov_type
         if cvf > 0:
             output_file += "_cv"+str(cvf)
         

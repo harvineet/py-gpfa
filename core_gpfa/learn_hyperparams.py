@@ -24,7 +24,6 @@ def learn_GP_params(seq, current_params):
     for i in range(xDim):
 
         initp = np.log(oldParams[i])           # Single param per latent dim
-
         curr_args = {
             'Tall': precomp['Tall'][i],
             'T': precomp['T'][i], 

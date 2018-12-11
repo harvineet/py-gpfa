@@ -7,3 +7,6 @@ output/*
 # IPython
 .ipynb_checkpoints/*
 optimization_gpfa.ipynb
+
+# pdf files
+**/*.pdf

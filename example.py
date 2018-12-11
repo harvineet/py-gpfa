@@ -7,23 +7,23 @@ from data_simulator import load_data
 import numpy as np
 from core_gpfa.postprocess import postprocess
 from core_gpfa.plot_3d import plot_3d, plot_1d, plot_1d_error
+import matplotlib.pyplot as plt
 
 # set random seed for reproducibility
-np.random.seed(1)
+# np.random.seed(1)
 
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
-INPUT_FILE = '../em_input_new.mat' # '../sample.mat'
+INPUT_FILE = '../em_input_new.mat' # '../fake_data_w_genparams.mat'
 
 x_dim = 8 # latent dimension
 method = 'gpfa'
-param_cov_type = 'rbf'
-param_Q = 1
-num_folds = 0
+param_cov_type = 'rbf' # 'rbf'
+param_Q = 2
+num_folds = 2
 kern_SD = 30
 
 # Load data
-# TODO
 dat = load_data(INPUT_FILE)
 
 # Extract trajectories
@@ -37,20 +37,28 @@ result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_di
 
 print("LL for training: %.4f, for testing: %.4f" % (result['LLtrain'], result['LLtest']))
 
+# Output filenames for plots
+output_file = OUTPUT_DIR+"/"+method+"_xdim_"+str(x_dim)+"_cov_"+param_cov_type
+
 # Plot trajectories in 3D space
-plot_3d(seq_train, 'x_orth', dims_to_plot=[0,1,2])
+plot_3d(seq_train, 'x_orth', dims_to_plot=[0,1,2], output_file=output_file)
 
 # Plot each dimension of trajectory
-plot_1d(seq_train, 'x_orth', result['bin_width'])
+plot_1d(seq_train, 'x_orth', result['bin_width'], output_file=output_file)
 
 # Prediction error and extrapolation plots on test set
 if len(seq_test)>0:
-    mean_error_trials = mean_squared_error(seq_test)
+    # Change to 'x_orth' to get prediction error for orthogonalized trajectories
+    mean_error_trials = mean_squared_error(seq_test, 'xsm')
     print("Mean sequared error across trials: %.4f" % mean_error_trials)
 
     # # Plot each dimension of trajectory, test data
     # plot_1d(seq_test, 'x_orth', result['bin_width'])
-    plot_1d_error(seq_test, 'x_orth', result['bin_width'])
+    # Change to 'x_orth' to plot orthogonalized trajectories
+    plot_1d_error(seq_test, 'xsm', result['bin_width'], output_file=output_file)
+
+# Plot all figures
+plt.show()
 
 # Cross-validation to find optimal state dimensionality
 # TODO
