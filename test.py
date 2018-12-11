@@ -31,12 +31,12 @@ if __name__ == "__main__":
     print("C_orth", est_params.C_orth)
 
     # Test for 3d plot
-    plot_3d(seq, 'x_orth', dims_to_plot=[0,1,2], output_file='test')
+    plot_3d(seq, 'x_orth', dims_to_plot=[0,1,2], output_file='../test')
 
     # Test for 1d plot
-    plot_1d(seq, 'x_orth', bin_width=20, output_file='test')
+    plot_1d(seq, 'x_orth', bin_width=20, output_file='../test')
 
     # Test error plot
-    plot_1d_error(seq, 'x_orth', bin_width=20, output_file='test')
+    plot_1d_error(seq, 'x_orth', bin_width=20, output_file='../test')
 
-    plt.show()
+    # plt.show()

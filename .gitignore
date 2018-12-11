@@ -10,3 +10,6 @@ optimization_gpfa.ipynb
 
 # pdf files
 **/*.pdf
+
+# Mac folder attribute file
+.DS_Store

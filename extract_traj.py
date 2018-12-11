@@ -10,6 +10,12 @@ def mean_squared_error(seq, xspec='xsm'):
     error_trials = np.zeros(len(seq))
     for n in range(len(seq)):
         x_dim = (seq[n].xsm).shape[0]
+        
+        # Dimension of predicted latent states not equal to true latent dimensions 
+        if seq[n].x.shape[0] != x_dim:
+            print("True and predicted latent state dimensions do not match")
+            return np.inf
+
         T = seq[n].T
         pred = getattr(seq[n], xspec)
         # Frobenius norm
