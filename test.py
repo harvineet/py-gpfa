@@ -17,7 +17,7 @@ if __name__ == "__main__":
     params.RforceDiagonal = True
 
     # Test for em
-    # res = test_em(params, seq, kernSDList = 30)
+    # res = test_em(params, seq, kernSDList = 30, minVarFrac=0.01)
 
     # Test for inference
     seq, LL = test_inference(seq, params)
