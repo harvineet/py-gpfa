@@ -31,9 +31,11 @@ def invPerSymm(M, blk_size, off_diag_sparse):
 
 # TODO
 # Fills in the bottom half of a block persymmetric matrix, given the top half
-def fillPerSymm(Pin, blk_size, T):
+def fillPerSymm(Pin, blk_size, T, usr_blk_size_vert = None):
 
     blk_size_vert = blk_size
+    if usr_blk_size_vert is not None:
+        blk_size_vert = usr_blk_size_vert
 
     # Fill in bottom half
     T_half = int(np.floor(T/2.))
