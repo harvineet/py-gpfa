@@ -33,7 +33,8 @@ def run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_fold
     (est_params, seq_train, seq_test) = postprocess(result['params'], result['seq_train'],\
                                                      result['seq_test'], method, kern_SD)
 
-    print("LL for training: %.4f, for testing: %.4f" % (result['LLtrain'], result['LLtest']))
+    print("LL for training: %.4f, for testing: %.4f, method: %s, x_dim:%d, param_cov_type:%s"\
+         % (result['LLtrain'], result['LLtest'], method, x_dim, param_cov_type))
 
     # Output filenames for plots
     output_file = OUTPUT_DIR+"/"+method+"_xdim_"+str(x_dim)+"_cov_"+param_cov_type

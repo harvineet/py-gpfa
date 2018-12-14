@@ -75,7 +75,8 @@ def plot_1d(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d.pdf')
             dat = getattr(seq[n], xspec)
             T = seq[n].T
 
-            ax.plot(range(T), dat[k,:], linewidth=1, color='grey')
+            pred_mean = np.squeeze(np.asarray(dat[k,:]))
+            ax.plot(range(T), pred_mean, linewidth=1, color='grey')
 
         ax.set_xlim([0, T_max])
         ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])

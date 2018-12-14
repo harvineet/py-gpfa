@@ -14,13 +14,13 @@ import matplotlib.pyplot as plt
 
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
-INPUT_FILE = '../em_input_new.mat' # '../fake_data_w_genparams.mat'
+INPUT_FILE = '../fake_data2_w_genparams.mat' # '../em_input_new.mat', '../fake_data_w_genparams.mat'
 
-x_dim = 8 # latent dimension
+x_dim = 2 # latent dimension
 method = 'gpfa'
-param_cov_type = 'sm' # 'rbf'
+param_cov_type = 'sm' # 'rbf', 'sm'
 param_Q = 2
-num_folds = 0
+num_folds = 2
 kern_SD = 30
 
 # Load data
@@ -46,7 +46,7 @@ if x_dim >=3:
     plot_3d(seq_train, 'x_orth', dims_to_plot=[0,1,2], output_file=output_file)
 
 # Plot each dimension of trajectory
-plot_1d(seq_train, 'x_orth', result['bin_width'], output_file=output_file)
+plot_1d(seq_train, 'xsm', result['bin_width'], output_file=output_file)
 
 # Prediction error and extrapolation plots on test set
 if len(seq_test)>0:
