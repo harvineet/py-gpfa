@@ -1,3 +1,6 @@
+# Written by Srikanth Gadicherla https://github.com/imsrgadich
+# Source: https://github.com/imsrgadich/gprsm/blob/master/gprsm/spectralmixture.py
+
 import numpy as np
 
 def init_sm_hyper(train_x, train_y, num_mixtures):
