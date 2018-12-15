@@ -44,7 +44,7 @@ class Model_Specs:
 class Trial_Class:
     def __init__(self, trial_id, T, seq_id, x,y):
         self.trial_id = trial_id
-        self.T = T
+        self.T = T # TODO: Confusion with transpose
         self.seq_id = seq_id
         self.y = y
         self.x = x

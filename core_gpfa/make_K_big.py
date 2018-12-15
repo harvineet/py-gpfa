@@ -25,7 +25,7 @@ def make_K_big(params, T):
             w = params.gamma[i][:params.Q]
             m = params.gamma[i][params.Q:params.Q*2]
             v = params.gamma[i][params.Q*2:params.Q*3]
-            K = np.zeros(diffSq.shape);
+            K = np.zeros(diffSq.shape)
             for j in range(len(w)):
                 K = K + w[j] * np.exp(-2 * np.pi**2 * v[j]**2 * diffSq) * np.cos(2 * np.pi *  Tdif.T * m[j]) 
 

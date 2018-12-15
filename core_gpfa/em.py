@@ -83,7 +83,6 @@ def em(current_params, seq, kernSDList, minVarFrac):
             current_params.R = (R + R.T) / 2
         
         if current_params.learnKernelParams:
-
             res = learn_GP_params(seq, current_params)
             current_params.gamma = res
 
