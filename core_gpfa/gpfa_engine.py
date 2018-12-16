@@ -86,12 +86,11 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
                 init_gamma[i, :] = hyper_params
 
             # Initialize with mean
-            print(np.mean(init_gamma, axis=0))
             current_params.gamma[d] = np.mean(init_gamma, axis=0)
-        print("initial hyper parameters", current_params.gamma)
+        print("initial hyper parameters\n", current_params.gamma)
 
     # Fit model parameters
-    print('\nFitting GPFA model\n')
+    print('\nFitting GPFA model with %s kernel\n' % param_cov_type)
   
     (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList, min_var_frac)
 

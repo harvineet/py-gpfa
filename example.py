@@ -15,13 +15,14 @@ import matplotlib.pyplot as plt
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
 INPUT_FILE = '../em_input_new.mat'
+# INPUT_FILE = '../dataForRoman_sort.mat'
 # INPUT_FILE = '../fake_data2_w_genparams.mat' # '../em_input_new.mat', '../fake_data2_w_genparams.mat', '../fake_data_w_genparams.mat'
 
 x_dim = 4 # latent dimension
 method = 'gpfa'
-param_cov_type = 'sm' # 'rbf', 'sm'
-param_Q = 2
-num_folds = 0
+param_cov_type = 'sm' # type of kernel: 'rbf', 'sm'
+param_Q = 2 # number of mixtures for SM
+num_folds = 0 # change to n>=2 for n-fold cross-validation
 kern_SD = 30
 
 # Load data
