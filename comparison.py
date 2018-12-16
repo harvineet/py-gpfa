@@ -2,7 +2,7 @@
 
 # Code modified from the version by Byron Yu byronyu@stanford.edu, John Cunningham jcunnin@stanford.edu
 
-from extract_traj import extract_traj, mean_squared_error
+from extract_traj import extract_traj, mean_squared_error, goodness_of_fit_rsquared
 from data_simulator import load_data
 import numpy as np
 from core_gpfa.postprocess import postprocess
@@ -51,6 +51,9 @@ def run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_fold
         # Change to 'x_orth' to get prediction error for orthogonalized trajectories
         mean_error_trials = mean_squared_error(seq_test, 'xsm')
         print("Mean sequared error across trials: %.4f" % mean_error_trials)
+
+        r2_trials = goodness_of_fit_rsquared(seq_test, x_dim, 'xsm')
+        print("R^2 averaged across trials: %s" % np.array_str(r2_trials, precision=4))
 
         # # Plot each dimension of trajectory, test data
         # plot_1d(seq_test, 'x_orth', result['bin_width'])

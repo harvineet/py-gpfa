@@ -14,14 +14,14 @@ def goodness_of_fit_rsquared(seq, x_dim, xspec='xsm'):
         # Dimension of predicted latent states not equal to true latent dimensions 
         if seq[n].x.shape[0] != x_dim:
             print("True and predicted latent state dimensions do not match")
-            return np.inf
+            return np.full(x_dim, np.nan)
 
         T = seq[n].T
         pred_latent_traj = getattr(seq[n], xspec)
 
         for d in range(x_dim):
             act_latent_traj = seq[n].x[d,:]
-            
+
             # R^2 from linear regression
             linear_reg = linear_model.LinearRegression()
             linear_reg.fit(X=pred_latent_traj.T, y=act_latent_traj.T)

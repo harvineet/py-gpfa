@@ -56,7 +56,7 @@ if len(seq_test)>0:
     mean_error_trials = mean_squared_error(seq_test, 'x_orth')
     print("Mean sequared error across trials: %.4f" % mean_error_trials)
 
-    r2_trials = goodness_of_fit_rsquared(seq_test, x_dim, 'x_orth')
+    r2_trials = goodness_of_fit_rsquared(seq_test, x_dim, 'xsm')
     print("R^2 averaged across trials: %s" % np.array_str(r2_trials, precision=4))
 
     # # Plot each dimension of trajectory, test data
