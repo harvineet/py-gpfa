@@ -6,7 +6,7 @@ from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
 from core_gpfa.em import em
 from Seq_Data_Class import Param_Class
 import scipy.io as sio
-from core_gpfa.init_sm_hyper import init_sm_hyper
+from core_gpfa.init_sm_hyper import init_sm_hyper, init_sm_hyper_v2
 
 # Skip or trim sequences to same length
 def cut_trials(seq_train, seg_length=20):
@@ -34,6 +34,7 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
 
     param_eps = start_eps * np.ones((x_dim,))       # GP noise variance
     kernSDList = 30
+    initialize_hyperparam = True
 
     if param_cov_type == 'rbf':
         param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
@@ -71,25 +72,24 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
                                     param_notes_learnKernelParams, param_notes_learnGPNoise,
                                     param_notes_RforceDiagonal, param_Q)
 
-    print('\nRunning E-step for initializing hyperparameters\n')
-    (seq_train, _) = exact_inference_with_LL(seq_train, current_params, getLL=False)
-    init_gamma = np.zeros((len(seq_train), current_params.Q*3))
-    # Calculate gamma for each latent dimension and each trial
-    for d in range(x_dim):
-        for i in range(len(seq_train)):
-            init_train_x = np.arange(seq_train[i].T).reshape((seq_train[i].T,1))
-            init_train_y = seq_train[i].xsm[d,:].T
-            mix_weights, mix_mu, mixture_scales = init_sm_hyper(train_x=init_train_x,\
-                                                                 train_y=init_train_y, num_mixtures=param_Q)
+    if initialize_hyperparam and param_cov_type == 'sm':
+        print('\nRunning E-step for initializing hyperparameters for SM\n')
+        (seq_train, _) = exact_inference_with_LL(seq_train, current_params, getLL=False)
+        init_gamma = np.zeros((len(seq_train), current_params.Q*3))
+        # Calculate gamma for each latent dimension and each trial
+        for d in range(x_dim):
+            for i in range(len(seq_train)):
+                init_train_x = np.arange(seq_train[i].T).reshape((seq_train[i].T,1))
+                init_train_y = seq_train[i].xsm[d,:].T
+                hyper_params = init_sm_hyper(x=init_train_x, y=init_train_y, Q=param_Q)
+                # hyper_params = init_sm_hyper_v2(train_x=init_train_x, train_y=init_train_y, num_mixtures=param_Q)
+                init_gamma[i, :] = hyper_params
 
-            init_gamma[i, 0:current_params.Q] = np.squeeze(mix_weights)
-            init_gamma[i, current_params.Q:current_params.Q*2] = np.squeeze(mix_mu)
-            init_gamma[i, current_params.Q*2:current_params.Q*3] = np.squeeze(mixture_scales)
+            # Initialize with mean
+            print(np.mean(init_gamma, axis=0))
+            current_params.gamma[d] = np.mean(init_gamma, axis=0)
+        print("initial hyper parameters", current_params.gamma)
 
-        # Initialize with mean
-        current_params.gamma[d] = np.mean(init_gamma, axis=0)
-    print("current_params.gamma", current_params.gamma)
-    
     # Fit model parameters
     print('\nFitting GPFA model\n')
   

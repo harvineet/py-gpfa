@@ -14,9 +14,10 @@ import matplotlib.pyplot as plt
 
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
-INPUT_FILE = '../fake_data2_w_genparams.mat' # '../em_input_new.mat', '../fake_data2_w_genparams.mat', '../fake_data_w_genparams.mat'
+INPUT_FILE = '../em_input_new.mat'
+# INPUT_FILE = '../fake_data2_w_genparams.mat' # '../em_input_new.mat', '../fake_data2_w_genparams.mat', '../fake_data_w_genparams.mat'
 
-x_dim = 2 # latent dimension
+x_dim = 4 # latent dimension
 method = 'gpfa'
 param_cov_type = 'sm' # 'rbf', 'sm'
 param_Q = 2

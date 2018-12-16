@@ -1,9 +1,62 @@
+import numpy as np
+import numbers
+import scipy.spatial.distance as spdist
+
+# Copied from https://python-future.org/_modules/future/utils.html#old_div
+def old_div(a, b):
+    """
+    DEPRECATED: import ``old_div`` from ``past.utils`` instead.
+
+    Equivalent to ``a / b`` on Python 2 without ``from __future__ import
+    division``.
+
+    TODO: generalize this to other objects (like arrays etc.)
+    """
+    if isinstance(a, numbers.Integral) and isinstance(b, numbers.Integral):
+        return a // b
+    else:
+        return a / b
+
+# Taken from PyGPs source code.
+# Written by Marion Neumann, Daniel Marthaler, Shan Huang, Kristian Kersting
+# Source: https://github.com/marionmari/pyGPs/blob/master/pyGPs/Core/cov.py
+def init_sm_hyper(x, y, Q):
+    """
+    Initialize hyperparameters for the spectral-mixture kernel. Weights are
+    all set to be uniformly distributed, means are given by a random sample
+    from a uniform distribution scaled by the Nyquist frequency, and variances are given by a random sample from a uniform distribution scaled by the max distance.
+    """
+    x = np.atleast_2d(x)
+    y = np.atleast_2d(y)
+    (n, D) = x.shape
+    w = np.zeros(Q)
+    m = np.zeros((D, Q))
+    s = np.zeros((D, Q))
+    w[:] = old_div(np.std(y), Q)
+    hypinit = np.zeros(Q + 2 * D * Q)
+
+    for i in range(D):
+        # Calculate distances
+        xslice = np.atleast_2d(x[:, i]).T
+        d2 = spdist.cdist(xslice, xslice, 'sqeuclidean')
+        if n > 1:
+            d2[d2 == 0] = d2[0, 1]
+        else:
+            d2[d2 == 0] = 1
+        minshift = np.min(np.min(np.sqrt(d2)))
+        nyquist = old_div(0.5, minshift)
+        m[i, :] = nyquist * np.random.ranf((1, Q))
+        maxshift = np.max(np.max(np.sqrt(d2)))
+        s[i, :] = old_div(1., np.abs(maxshift * np.random.ranf((1, Q))))
+    hypinit[:Q] = w
+    hypinit[Q + np.arange(0, Q * D)] = np.squeeze(m[:].T)
+    hypinit[Q + Q * D + np.arange(0, Q * D)] = np.squeeze(s[:].T)
+
+    return list(hypinit)
+
 # Written by Srikanth Gadicherla https://github.com/imsrgadich
 # Source: https://github.com/imsrgadich/gprsm/blob/master/gprsm/spectralmixture.py
-
-import numpy as np
-
-def init_sm_hyper(train_x, train_y, num_mixtures):
+def init_sm_hyper_v2(train_x, train_y, num_mixtures):
     """
     For initialization of the parameters for the Spectral Mixture
     Kernel.
@@ -67,4 +120,9 @@ def init_sm_hyper(train_x, train_y, num_mixtures):
     # dim: 1 x Q
     mixture_weights= np.divide(np.std(train_y,axis=0),num_mixtures)*np.ones(num_mixtures)
 
-    return np.asarray(mixture_weights), np.asarray(mixture_means), np.asarray(mixture_scales.T)
+    init_hyper = np.zeros(num_mixtures*3)
+    init_hyper[0:num_mixtures] = np.squeeze(np.asarray(mixture_weights))
+    init_hyper[num_mixtures:num_mixtures*2] = np.squeeze(np.asarray(mixture_means))
+    init_hyper[num_mixtures*2:num_mixtures*3] = np.squeeze(np.asarray(mixture_scales.T))
+
+    return init_hyper
