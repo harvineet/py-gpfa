@@ -9,6 +9,7 @@ mpl.rcParams['figure.figsize'] = [10, 6]
 # mpl.rcParams['figure.dpi'] = 300
 plt.rc('text', usetex=True)
 
+# TODO sample multiple seq_id and plot
 def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_3d.pdf'):
 
     n_plot_max = 20
@@ -18,16 +19,61 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_
     ax = fig.gca(projection='3d')
     ax.set_aspect('equal')
 
+    # Get number of unique seq_id for coloring
+    uniq_seq_id = []
+    for n in range(len(seq)):
+        if hasattr(seq[0], 'seq_id'):
+            uniq_seq_id.append(seq[n].seq_id)
+    uniq_seq_id = set(uniq_seq_id)
+    # TODO Create colormap for len(uniq_seq_id) colors
+    # Category10 color palette
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728',
+              '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
+              '#bcbd22', '#17becf']
+
     for n in range(min(len(seq), n_plot_max)):
         dat_xspec = getattr(seq[n], xspec)
         dat = dat_xspec[dims_to_plot,:]
         T = seq[n].T
-        ax.plot(dat[0,:], dat[1,:], dat[2,:], color='grey', marker='.', markersize=4)
+        x_1 = np.squeeze(np.asarray(dat[0,:]))
+        x_2 = np.squeeze(np.asarray(dat[1,:]))
+        x_3 = np.squeeze(np.asarray(dat[2,:]))
+
+        if len(uniq_seq_id)==0:
+            ax.plot(x_1, x_2, x_3, color='grey', marker='.', markersize=4)
+        else:
+            # Color based on seq_id
+            ax.plot(x_1, x_2, x_3, color=colors[seq[n].seq_id], marker='.',\
+                     markersize=4, label='Cond: '+str(seq[n].seq_id)+', Trial: '+str(seq[n].trial_id))
+
+    if len(uniq_seq_id)>0:
+        # Remove duplicate labels
+        # Source: https://stackoverflow.com/questions/13588920/stop-matplotlib-repeating-labels-in-legend
+        # handles, labels = plt.gca().get_legend_handles_labels()
+        # print(handles, labels)
+        # uniq_by_label = {}
+        # for handle, label in zip(handles, labels):
+        #     uniq_by_label[label] = handle
+        # print(uniq_by_label)
+        # ax.legend(uniq_by_label.values(), uniq_by_label.keys())
+        
+        # Shrink width by 20% and plot legend on right
+        # Source: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        # ax.legend()
 
     # Source: https://matplotlib.org/users/usetex.html
-    ax.set_xlabel(r'$\tilde{x}_{1,:}$', fontsize=18)
-    ax.set_ylabel(r'$\tilde{x}_{2,:}$', fontsize=18)
-    ax.set_zlabel(r'$\tilde{x}_{3,:}$', fontsize=18)
+    if xspec=='x_orth':
+        ax.set_xlabel(r'$\tilde{x}_{1,:}$', fontsize=18)
+        ax.set_ylabel(r'$\tilde{x}_{2,:}$', fontsize=18)
+        ax.set_zlabel(r'$\tilde{x}_{3,:}$', fontsize=18)
+    elif xspec=='xsm':
+        ax.set_xlabel(r'$x_{1,:}$', fontsize=18)
+        ax.set_ylabel(r'$x_{2,:}$', fontsize=18)
+        ax.set_zlabel(r'$x_{3,:}$', fontsize=18)
 
     # Written by Remy F (https://stackoverflow.com/users/1840524/remy-f)
     # Source: https://stackoverflow.com/questions/13685386/matplotlib-equal-unit-length-with-equal-aspect-ratio-z-axis-is-not-equal-to
@@ -82,7 +128,10 @@ def plot_1d(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d.pdf')
         ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])
 
         # Source: https://matplotlib.org/users/usetex.html
-        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=18)
+        if xspec=='x_orth':
+            ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=18)
+        elif xspec=='xsm':
+            ax.set_title(r'$\mathbf{x}_{%d,:}$' % (k+1), fontsize=18)
 
         ax.set_xticks(xtk)
         ax.set_xticklabels(xtkl)
@@ -144,13 +193,17 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d
                 print("True and predicted latent state dimensions do not match")
                 break
             
-            ax.plot(range(T), seq[n].x[k,:], marker='x', linewidth=1, color='red')
+            act = np.squeeze(np.asarray(seq[n].x[k,:]))
+            ax.plot(range(T), act, marker='x', linewidth=1, color='red')
 
         ax.set_xlim([0, T_max])
         ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])
 
         # Source: https://matplotlib.org/users/usetex.html
-        ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=18)
+        if xspec=='x_orth':
+            ax.set_title(r'$\tilde{\mathbf{x}}_{%d,:}$' % (k+1), fontsize=18)
+        elif xspec=='xsm':
+            ax.set_title(r'$\mathbf{x}_{%d,:}$' % (k+1), fontsize=18)
 
         ax.set_xticks(xtk)
         ax.set_xticklabels(xtkl)
