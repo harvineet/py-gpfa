@@ -55,7 +55,7 @@ def em(current_params, seq, kernSDList, minVarFrac):
             sum_Pauto = sum_Pauto + np.sum(seq[n].Vsm, 2) + np.matmul(seq[n].xsm, seq[n].xsm.T)
 
         Y           = np.concatenate([trial.y for trial in seq], 1) # model.stack_attributes('y')
-        Xsm         = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq], 1) # model.stack_attributes('xsm')
+        Xsm         = np.concatenate([np.array(trial.xsm) for trial in seq], 1) # model.stack_attributes('xsm')
         sum_yxtrans = np.matmul(Y, Xsm.T)
         sum_xall    = np.ravel(np.sum(Xsm, 1))
         sum_yall    = np.sum(Y, 1)

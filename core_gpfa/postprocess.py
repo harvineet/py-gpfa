@@ -46,7 +46,7 @@ def segment_by_trial(seq, X, fn):
 def postprocess(est_params, seq_train, seq_test, method, kern_SD):
     if method=='gpfa':
         C = est_params.C
-        X  = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq_train], 1)
+        X  = np.concatenate([np.array(trial.xsm) for trial in seq_train], 1)
         (X_orth, C_orth, _)  = orthogonalize(X, C)
         seq_train = segment_by_trial(seq_train, X_orth, 'x_orth')
 
@@ -54,7 +54,7 @@ def postprocess(est_params, seq_train, seq_test, method, kern_SD):
 
         if len(seq_test)>0:
             (seq_test, LLtest) = exact_inference_with_LL(seq_test, est_params)
-            X  = np.concatenate([np.squeeze(np.array(trial.xsm)) for trial in seq_test], 1)
+            X  = np.concatenate([np.array(trial.xsm) for trial in seq_test], 1)
             (X_orth, C_orth, _)  = orthogonalize(X, C)
             seq_test = segment_by_trial(seq_test, X_orth, 'x_orth')
     else:

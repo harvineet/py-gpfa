@@ -12,13 +12,14 @@ from core_gpfa.plot_3d import plot_3d, plot_1d, plot_1d_error
 # np.random.seed(1)
 
 methods = ['gpfa']
-param_cov_types = ['sm','rbf']
-param_Qs = [2] # only for sm
-x_dims = [3, 5, 8] # latent dimension
-num_folds = 0
+param_cov_types = ['rbf','sm']
+param_Qs = [2,3] # only for sm
+x_dims = [1,2,3,5,8] # latent dimension
+num_folds = 2
 kern_SD = 30
 
-INPUT_FILE = '../em_input_new.mat' # '../fake_data_w_genparams.mat'
+INPUT_FILE = '../dataForRoman_sort.mat'
+# INPUT_FILE = '../em_input_new.mat' # '../fake_data_w_genparams.mat'
 
 def run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_folds):
     # Load data
@@ -49,7 +50,7 @@ def run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_fold
     # Prediction error and extrapolation plots on test set
     if len(seq_test)>0:
         # Change to 'x_orth' to get prediction error for orthogonalized trajectories
-        mean_error_trials = mean_squared_error(seq_test, 'xsm')
+        mean_error_trials = mean_squared_error(seq_test, 'x_orth')
         print("Mean sequared error across trials: %.4f" % mean_error_trials)
 
         r2_trials = goodness_of_fit_rsquared(seq_test, x_dim, 'xsm')
