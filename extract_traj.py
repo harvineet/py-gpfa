@@ -3,7 +3,35 @@
 import os
 from core_gpfa.gpfa_engine import gpfa_engine
 import numpy as np
+from sklearn import linear_model
 # import copy # CHECK if required
+
+# R^2 between actual and predicted latent trajectories
+def goodness_of_fit_rsquared(seq, x_dim, xspec='xsm'):
+    r2_trials = np.zeros((len(seq), x_dim))
+    for n in range(len(seq)):
+        
+        # Dimension of predicted latent states not equal to true latent dimensions 
+        if seq[n].x.shape[0] != x_dim:
+            print("True and predicted latent state dimensions do not match")
+            return np.inf
+
+        T = seq[n].T
+        pred_latent_traj = getattr(seq[n], xspec)
+
+        for d in range(x_dim):
+            act_latent_traj = seq[n].x[d,:]
+            
+            # R^2 from linear regression
+            linear_reg = linear_model.LinearRegression()
+            linear_reg.fit(X=pred_latent_traj.T, y=act_latent_traj.T)
+            r2_value = linear_reg.score(X=pred_latent_traj.T, y=act_latent_traj.T)
+            r2_trials[n,d] = r2_value
+
+    print("r2_trials", r2_trials)
+    mean_r2_trials = np.mean(r2_trials, axis=0)
+
+    return mean_r2_trials
 
 # Mean squared error between actual and predicted latent trajectories
 def mean_squared_error(seq, xspec='xsm'):

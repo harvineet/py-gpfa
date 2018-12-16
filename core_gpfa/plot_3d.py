@@ -139,6 +139,11 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d
             ax.plot(range(T), pred_mean, linewidth=1, color='grey', label='Predicted mean')
 
             # Plot actual
+            # Dimension of predicted latent states not equal to true latent dimensions 
+            if seq[n].x.shape[0] != X_all.shape[0]:
+                print("True and predicted latent state dimensions do not match")
+                break
+            
             ax.plot(range(T), seq[n].x[k,:], marker='x', linewidth=1, color='red')
 
         ax.set_xlim([0, T_max])
