@@ -4,6 +4,7 @@ import os
 from core_gpfa.gpfa_engine import gpfa_engine
 import numpy as np
 from sklearn import linear_model
+import scipy.io as sio
 # import copy # CHECK if required
 
 # R^2 between actual and predicted latent trajectories
@@ -55,6 +56,40 @@ def mean_squared_error(seq, xspec='xsm'):
     mean_error_trials = np.mean(error_trials)
 
     return mean_error_trials
+
+def getPredErrorVsDim(OUTPUT_DIR, method, param_cov_type, num_folds, dims):
+    
+    
+    # Compute the leave-one-out prediction error for each dimension separately
+
+    # Loop over dimensions
+    dim_errs = []
+    for x_dim in dims:
+        # Loop over folds
+        fold_errs = np.zeros((num_folds, x_dim))
+        sse = []
+        for fold in np.arange(1, num_folds+1):
+
+            # Define output file to load
+            file = OUTPUT_DIR+method+'_xdim_'+str(x_dim)+"_cov_"+param_cov_type+"_cv"+str(fold)+".mat"
+            curr_file = sio.loadmat(file)
+
+            # Observations for the test set
+            YtestRaw = np.concatenate([curr_file['seq_test'].flatten()[i][0][0][3] \
+                                      for i in range(curr_file['seq_test'].flatten().size)], 1)
+            errs = []
+            # Leave one out predictions across all trials within given dimension
+            for p in range(x_dim):
+                Ycs = np.concatenate([curr_file['leave_one_out'].flatten()[i]['dim'+str(p)][0][0] \
+                                       for i in range(curr_file['leave_one_out'].flatten().size)],1)
+                sseOrth = np.sum((Ycs.flatten() - YtestRaw.flatten()) ** 2)
+                errs.append(sseOrth)
+
+            fold_errs[fold-1,:] = np.array(errs)
+            sse.append(errs[-1])
+
+        dim_errs.append(np.sum(sse))
+    return dim_errs, np.sum(fold_errs,0)
 
 def extract_traj(output_dir, data, method='gpfa', x_dim=3, param_cov_type='rbf', param_Q = 3, num_folds = 0):
     # num_folds: number of splits (>= 2), set 0 for using all train data

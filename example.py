@@ -2,7 +2,7 @@
 
 # Code modified from the version by Byron Yu byronyu@stanford.edu, John Cunningham jcunnin@stanford.edu
 
-from extract_traj import extract_traj, mean_squared_error, goodness_of_fit_rsquared
+from extract_traj import extract_traj, mean_squared_error, goodness_of_fit_rsquared, getPredErrorVsDim
 from data_simulator import load_data
 import numpy as np
 from core_gpfa.postprocess import postprocess
@@ -20,17 +20,32 @@ INPUT_FILE = '../em_input_new.mat'
 
 x_dim = 4 # latent dimension
 method = 'gpfa'
-param_cov_type = 'sm' # type of kernel: 'rbf', 'sm'
+param_cov_type = 'rbf' # type of kernel: 'rbf', 'sm'
 param_Q = 2 # number of mixtures for SM
-num_folds = 0 # change to n>=2 for n-fold cross-validation
+num_folds = 3 # change to n>=2 for n-fold cross-validation
 kern_SD = 30
 
 # Load data
 dat = load_data(INPUT_FILE)
 
-# Extract trajectories
+
 result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_dim,\
-                            param_cov_type=param_cov_type, param_Q = param_Q, num_folds = num_folds)
+                        param_cov_type=param_cov_type, param_Q = param_Q, num_folds = num_folds)
+
+# Extract trajectories for dufferent dimensionalities
+# dims = [2, 5, 8]
+# for x_dim in dims:
+#     result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_dim,\
+#                             param_cov_type=param_cov_type, param_Q = param_Q, num_folds = num_folds)
+
+# Get leave-one-out prediction (see Yu et al., 2009 for details on GPFA reduced)
+# gpfa_errs, gpfa_reduced_errs = getPredErrorVsDim(OUTPUT_DIR, method, param_cov_type, num_folds, dims)
+
+# # Plotting can be done as follows:
+# plt.plot(dims, gpfa_errs, '--k')
+# plt.plot(np.arange(1,gpfa_reduced_errs.size+1),gpfa_reduced_errs)
+# plt.xlabel('State dimensionality')
+# plt.ylabel('Prediction error')
 
 # Orthonormalize trajectories
 # Returns results for the last run cross-validation fold, if enabled
