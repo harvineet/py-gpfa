@@ -37,8 +37,8 @@ result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_di
 (est_params, seq_train, seq_test) = postprocess(result['params'], result['seq_train'],\
                                                  result['seq_test'], method, kern_SD)
 
-print("LL for training: %.4f, for testing: %.4f, method: %s, x_dim:%d, param_cov_type:%s"\
-         % (result['LLtrain'], result['LLtest'], method, x_dim, param_cov_type))
+print("LL for training: %.4f, for testing: %.4f, method: %s, x_dim:%d, param_cov_type:%s, param_Q:%d"\
+         % (result['LLtrain'], result['LLtest'], method, x_dim, param_cov_type, param_Q))
 
 # Output filenames for plots
 output_file = OUTPUT_DIR+"/"+method+"_xdim_"+str(x_dim)+"_cov_"+param_cov_type
