@@ -7,6 +7,7 @@ from core_gpfa.em import em
 from Seq_Data_Class import Param_Class
 import scipy.io as sio
 from core_gpfa.init_sm_hyper import init_sm_hyper, init_sm_hyper_v2
+from core_gpfa.cosmoother_gpfa_viaOrth_fast import cosmoother_gpfa_viaOrth_fast
 
 # Skip or trim sequences to same length
 def cut_trials(seq_train, seg_length=20):
@@ -102,11 +103,15 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
     # TODO
 
     LLtest = np.nan
+    leave_one_out = []
     if len(seq_test)>0:
+        if est_params.RforceDiagonal:
+            leave_one_out = cosmoother_gpfa_viaOrth_fast(seq_test, est_params, np.arange(x_dim))
+
         (_, LLtest) = exact_inference_with_LL(seq_test, est_params, getLL=True)
 
     result = dict({'LLtrain':LLtrain, 'LLtest':LLtest, 'params':est_params, 'seq_train':seq_train,\
-                 'seq_test':seq_test, 'bin_width':bin_width})
+                 'seq_test':seq_test, 'bin_width':bin_width, 'leave_one_out':leave_one_out})
 
     # Save results
     save_results(fname, result)

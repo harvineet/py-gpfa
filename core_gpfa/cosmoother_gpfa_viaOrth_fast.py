@@ -9,6 +9,12 @@ import scipy
 # Author: Byron Yu 2009
 # Translated to Python by Roman Huszar
 
+import numpy as np
+import scipy
+from core_gpfa.postprocess import orthogonalize
+from core_gpfa.make_K_big import make_K_big
+from core_gpfa.util import invPerSymm, fillPerSymm
+
 def cosmoother_gpfa_viaOrth_fast(seq, params, mList):
 
     yDim, xDim = params.C.shape
@@ -22,7 +28,7 @@ def cosmoother_gpfa_viaOrth_fast(seq, params, mList):
 
     out_seq = []
     for i in range(len(seq)):
-        out_seq.append( {key: np.empty((yDim, seq[key].T)) * np.nan for key in mList} )
+        out_seq.append( {'dim'+str(key): np.empty((yDim, seq[key].T)) * np.nan for key in mList} )
 
     for j in range(Tu.size):
 
@@ -79,7 +85,7 @@ def cosmoother_gpfa_viaOrth_fast(seq, params, mList):
                 xorth = np.matmul( TT, np.reshape(xsmMat[:,ctr], (xDim, T), order='F') )
 
                 for m in mList:
-                    out_seq[n][m][i,:] = np.matmul(Corth[i, np.arange(m+1)], xorth[np.arange(m+1),:]) + params.d[i]
+                    out_seq[n]['dim'+str(m)][i,:] = np.matmul(Corth[i, np.arange(m+1)], xorth[np.arange(m+1),:]) + params.d[i]
 
                 ctr = ctr + 1
 
