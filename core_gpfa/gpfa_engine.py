@@ -37,71 +37,94 @@ def gpfa_engine(seq_train, seq_test, fname, x_dim, bin_width, param_cov_type='rb
     kernSDList = 30
     initialize_hyperparam = True
 
-    if param_cov_type == 'rbf':
-        param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
-
-    elif param_cov_type == 'sm':
-        param_gamma = []
-        for i in range(x_dim):
-            weights = np.ones(param_Q).tolist()
-            weights = weights / np.sum(weights)
-            weights = weights.tolist()
-            mu = np.random.uniform(0, 1, param_Q).tolist()
-            vs = np.random.uniform(0, 1, param_Q).tolist()
-            param_gamma.append(weights + mu + vs)
+    y_all = np.concatenate([trial.y for trial in seq_train_cut], 1)
 
     # Initialize observation model parameters
     # Run FA to initialize parameters
-    y_all = np.concatenate([trial.y for trial in seq_train_cut], 1)
-
     print('\nRunning FA model for initialization\n')
 
     fa_params_L, fa_params_Ph, fa_params_d, _ = fastfa(y_all, x_dim) # TODO Fast FA
 
     param_d = fa_params_d
-    param_C = fa_params_L # TODO faParams.L
-    param_R = np.diag(fa_params_Ph) # TODO diag(faParams.Ph)
+    param_C = fa_params_L 
+    param_R = np.diag(fa_params_Ph) 
 
     # Define parameter constraints
     param_notes_learnKernelParams = True
     param_notes_learnGPNoise      = False
     param_notes_RforceDiagonal    = True
 
-    # TODO Separate params for rbf and sm
-    current_params = Param_Class(param_cov_type, param_gamma, 
-                                    param_eps, param_d, param_C, param_R,
-                                    param_notes_learnKernelParams, param_notes_learnGPNoise,
-                                    param_notes_RforceDiagonal, param_Q)
-
-    if initialize_hyperparam and param_cov_type == 'sm':
-        print('\nRunning E-step for initializing hyperparameters for SM\n')
-        (seq_train, _) = exact_inference_with_LL(seq_train, current_params, getLL=False)
-        init_gamma = np.zeros((len(seq_train), current_params.Q*3))
-        # Calculate gamma for each latent dimension and each trial
-        for d in range(x_dim):
-            for i in range(len(seq_train)):
-                init_train_x = np.arange(seq_train[i].T).reshape((seq_train[i].T,1))
-                init_train_y = seq_train[i].xsm[d,:].T
-                hyper_params = init_sm_hyper(x=init_train_x, y=init_train_y, Q=param_Q)
-                # hyper_params = init_sm_hyper_v2(train_x=init_train_x, train_y=init_train_y, num_mixtures=param_Q)
-                init_gamma[i, :] = hyper_params
-
-            # Initialize with mean
-            current_params.gamma[d] = np.mean(init_gamma, axis=0)
-        print("initial hyper parameters\n", current_params.gamma)
 
     # Fit model parameters
     print('\nFitting GPFA model with %s kernel\n' % param_cov_type)
-  
-    (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList, min_var_frac)
 
-    # Extract trajectories for original, unsegmented trials
-    # using learned parameters
-    (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, getLL=True)
+    if param_cov_type == 'rbf':
+        param_gamma = (bin_width / start_tau)**2 * np.ones((x_dim,))
+
+        # TODO Separate params for rbf and sm
+        current_params = Param_Class(param_cov_type, param_gamma, 
+                                        param_eps, param_d, param_C, param_R,
+                                        param_notes_learnKernelParams, param_notes_learnGPNoise,
+                                        param_notes_RforceDiagonal, param_Q)
+
+        (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList, min_var_frac)
+        (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, getLL=True)
+
+    elif param_cov_type == 'sm':
+        
+        flag = True
+        tryNum = 1
+
+        # Try running EM / inference with different random initializations when using SM kernel
+        # (found that you can get errors in logdet from both EM and inference - linalg error, cholesky decomposition of non PSD matrix)
+        # You exit the while loop once you find an initialization for which 
+        while flag:
+
+            param_gamma = []
+            for i in range(x_dim):
+                weights = np.ones(param_Q).tolist()
+                weights = weights / np.sum(weights)
+                weights = weights.tolist()
+                mu = np.random.uniform(0, 1, param_Q).tolist()
+                vs = np.random.uniform(0, 1, param_Q).tolist()
+                param_gamma.append(weights + mu + vs)
+
+            current_params = Param_Class(param_cov_type, param_gamma, 
+                    param_eps, param_d, param_C, param_R,
+                    param_notes_learnKernelParams, param_notes_learnGPNoise,
+                    param_notes_RforceDiagonal, param_Q)
+            try:
+
+                print("\n Attempt %d of SM fitting for xdim %d \n" % (tryNum, x_dim))
+                if initialize_hyperparam:
+
+                    print('\nRunning E-step for initializing hyperparameters for SM\n')
+                    (seq_train, _) = exact_inference_with_LL(seq_train, current_params, getLL=False)
+                    init_gamma = np.zeros((len(seq_train), current_params.Q*3))
+                    # Calculate gamma for each latent dimension and each trial
+                    for d in range(x_dim):
+                        for i in range(len(seq_train)):
+                            init_train_x = np.arange(seq_train[i].T).reshape((seq_train[i].T,1))
+                            init_train_y = seq_train[i].xsm[d,:].T
+                            hyper_params = init_sm_hyper(x=init_train_x, y=init_train_y, Q=param_Q)
+                            # hyper_params = init_sm_hyper_v2(train_x=init_train_x, train_y=init_train_y, num_mixtures=param_Q)
+                            init_gamma[i, :] = hyper_params
+
+                        # Initialize with mean
+                        current_params.gamma[d] = np.mean(init_gamma, axis=0).tolist()
+                print("Initial hyper parameters\n", current_params.gamma)
+
+                # Attempt EM and inference
+                (est_params, seq_train_cut, LLcut, iter_time) = em(current_params, seq_train_cut, kernSDList, min_var_frac)
+                (seq_train, LLtrain) = exact_inference_with_LL(seq_train, est_params, getLL=True)
+                print("\n Attempt %d succeeded!" % (tryNum))
+                flag = False
+            except Exception as e:
+                print('Error:', e)
+                tryNum += 1 
 
     # Assess generalization performance
     # TODO
-
     LLtest = np.nan
     leave_one_out = []
     if len(seq_test)>0:
