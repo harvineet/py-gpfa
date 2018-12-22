@@ -27,7 +27,8 @@ def make_K_big(params, T):
             v = params.gamma[i][params.Q*2:params.Q*3]
             K = np.zeros(diffSq.shape)
             for j in range(len(w)):
-                K = K + w[j] * np.exp(-2 * np.pi**2 * v[j]**2 * diffSq) * np.cos(2 * np.pi *  Tdif.T * m[j]) 
+                K = K + w[j] * np.exp(-2 * np.pi**2 * v[j]**2 * diffSq) * np.cos(2 * np.pi *  Tdif.T * m[j])
+            K = K + 0.00001*np.identity(K.shape[0])
 
         K_big[np.ix_(idx+i, idx+i)] = K
         inv_K, logdet_K = invToeplitz(K) # TODO Trench method
