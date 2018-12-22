@@ -43,7 +43,7 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_
             ax.plot(x_1, x_2, x_3, color='grey', marker='.', markersize=4)
         else:
             # Color based on seq_id
-            ax.plot(x_1, x_2, x_3, color=colors[seq[n].seq_id], marker='.',\
+            ax.plot(x_1, x_2, x_3, color=colors[min(seq[n].seq_id, len(colors)-1)], marker='.',\
                      markersize=4, label='Cond: '+str(seq[n].seq_id)+', Trial: '+str(seq[n].trial_id))
 
     if len(uniq_seq_id)>0:

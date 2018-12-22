@@ -18,8 +18,8 @@ x_dims = [1,2,3,4] # latent dimension
 num_folds = 3
 kern_SD = 30
 
-INPUT_FILE = '../fake_data2_w_genparams.mat'
-# INPUT_FILE = '../em_input_new.mat' # '../fake_data_w_genparams.mat'
+INPUT_FILE = '../dataForRoman_sort.mat'
+# INPUT_FILE = '../fake_data2_w_genparams.mat' #'../em_input_new.mat' # '../fake_data_w_genparams.mat' '../fake_data2_w_genparams.mat'
 
 def run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_folds):
     # Load data
@@ -34,8 +34,8 @@ def run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_fold
     (est_params, seq_train, seq_test) = postprocess(result['params'], result['seq_train'],\
                                                      result['seq_test'], method, kern_SD)
 
-    print("LL for training: %.4f, for testing: %.4f, method: %s, x_dim:%d, param_cov_type:%s"\
-         % (result['LLtrain'], result['LLtest'], method, x_dim, param_cov_type))
+    print("LL for training: %.4f, for testing: %.4f, method: %s, x_dim:%d, param_cov_type:%s, param_Q:%d"\
+         % (result['LLtrain'], result['LLtest'], method, x_dim, param_cov_type, param_Q))
 
     # Output filenames for plots
     output_file = OUTPUT_DIR+"/"+method+"_xdim_"+str(x_dim)+"_cov_"+param_cov_type
