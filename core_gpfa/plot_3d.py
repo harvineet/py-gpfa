@@ -18,7 +18,7 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    ax.set_aspect('equal')
+    # ax.set_aspect('equal')
 
     # Get number of unique seq_id for coloring
     list_seq_id = []

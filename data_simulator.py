@@ -151,14 +151,15 @@ def save_data(filepath,sample_data,params):
     save = {'seq':[[]]}
     for i in range (len(sample_data)):
         save['seq'][0].append([[[sample_data[i].trial_id]],[[sample_data[i].T]],[[sample_data[i].seq_id]],sample_data[i].x,sample_data[i].y])
-    save['currentParams'] = [[[[params.cov_type],[params.gamma],[params.eps],[params.d],params.C,params.R]]]
+    save['currentParams'] = [[[[params.cov_type],[params.gamma],[params.eps],params.d[:,np.newaxis],params.C,params.R]]]
     #save['extra_opts'] = [['kernSDList']],[[30]]]
     scipy.io.savemat(filepath,save,do_compression=True)
     print("Saved file at", filepath)
 
 def save_params(filepath,params):
     save = {}
-    save['currentParams'] = [[params.cov_type],[params.gamma],[params.eps],[params.d],params.C,params.R]
+    save['currentParams'] = [[[[params.cov_type],[params.gamma],[params.eps],params.d[:,np.newaxis],params.C,params.R]]]
+    scipy.io.savemat(filepath,save,do_compression=True)
     print("Saved file at", filepath)
     
 # Load from file
@@ -177,7 +178,8 @@ def load_params(filepath):
 
 if __name__ == "__main__":
     print("Simulating data")
-    params = load_params('em_input.mat')
-    sample_data,save_params = sample_data('sm',params,56)
-    print(sample_data)
-    save_data('sample_sm.mat',sample_data,save_params)
+    cov_type = 'sm' # or 'sm'
+    params = load_params('input/example_params_{}.mat'.format(cov_type))
+    sampled_data,saved_params = sample_data(cov_type,params,56,20)
+    print(sampled_data)
+    save_data('input/fake_data_{}.mat'.format(cov_type),sampled_data,saved_params)

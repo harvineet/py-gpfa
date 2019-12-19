@@ -8,22 +8,27 @@ import numpy as np
 from core_gpfa.postprocess import postprocess
 from core_gpfa.plot_3d import plot_3d, plot_1d, plot_1d_error
 import matplotlib.pyplot as plt
+# import matplotlib
+# matplotlib.use('agg')
+# plt.switch_backend('agg')
 
 # set random seed for reproducibility
 # np.random.seed(1)
 
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
-INPUT_FILE = '../em_input_new.mat'
-# INPUT_FILE = '../dataForRoman_sort.mat'
-# INPUT_FILE = '../fake_data2_w_genparams.mat' # '../em_input_new.mat', '../fake_data2_w_genparams.mat', '../fake_data_w_genparams.mat'
 
 x_dim = 4 # latent dimension
 method = 'gpfa'
-param_cov_type = 'rbf' # type of kernel: 'rbf', 'sm'
+param_cov_type = 'rbf' # type of kernel: 'rbf' or 'sm'
 param_Q = 2 # number of mixtures for SM
 num_folds = 3 # change to n>=2 for n-fold cross-validation
 kern_SD = 30
+
+INPUT_FILE = './input/fake_data_{}.mat'.format(param_cov_type)
+# INPUT_FILE = '../em_input_new.mat'
+# INPUT_FILE = '../dataForRoman_sort.mat'
+# INPUT_FILE = '../fake_data2_w_genparams.mat' # '../em_input_new.mat', '../fake_data2_w_genparams.mat', '../fake_data_w_genparams.mat'
 
 # Load data
 dat = load_data(INPUT_FILE)
