@@ -14,8 +14,8 @@ from core_gpfa.plot_3d import plot_3d, plot_1d, plot_1d_error
 methods = ['gpfa']
 param_cov_types = ['rbf','sm']
 param_Qs = [2,3] # only for sm
-x_dims = [1,2,3,5,8] # latent dimension
-num_folds = 2
+x_dims = [1,2,3,4] # latent dimension
+num_folds = 3
 kern_SD = 30
 
 INPUT_FILE = '../dataForRoman_sort.mat'
@@ -68,22 +68,12 @@ RUN_ID = 1
 for method in methods:
     for param_cov_type in param_cov_types:
         for x_dim in x_dims:
-            if param_cov_type=='sm':
+            if param_cov_type == 'sm':
                 for param_Q in param_Qs:
-                    OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
-                    ctr = 0
-                    while ctr < 100:
-                        try:
-                            run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_folds)
-                            ctr = 100
-                        except Exception as e:
-                        # TODO Catch LinAlgError and OverflowError 
-                        # except np.linalg.LinAlgError as e:
-                            print(e)
-                            print("Retry count %d" % (ctr+1))
-                            ctr+=1
-                    RUN_ID+=1
+                    OUTPUT_DIR = './output_fake/'+str(RUN_ID)+'/'
+                    run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, param_Q, num_folds)
+                    RUN_ID += 1
             else:
-                OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
+                OUTPUT_DIR = './output_fake/'+str(RUN_ID)+'/'
                 run(INPUT_FILE, OUTPUT_DIR, method, x_dim, param_cov_type, 1, num_folds) # param_Q can be set to anything for rbf
-                RUN_ID+=1
+                RUN_ID += 1

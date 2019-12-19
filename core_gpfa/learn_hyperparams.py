@@ -136,6 +136,7 @@ def grad_sm(p, curr_args, Q):
     Kmax = np.zeros(curr_args['difSq'].shape)
     for i in range(Q):
         Kmax = Kmax + w[i] * np.exp(-2 * np.pi**2 * v[i]**2 * curr_args['difSq']) * np.cos(2 * np.pi *  curr_args['Tdif'].T * m[i]) 
+    Kmax = Kmax + 0.00001*np.identity(Kmax.shape[0])
 
     T = curr_args['T'][0]
     Kinv, logdet_K = invToeplitz(Kmax[0:T, 0:T])
