@@ -12,7 +12,8 @@ plt.rc('text', usetex=True)
 # TODO sample multiple seq_id and plot
 def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_3d.pdf'):
 
-    n_plot_max = 20
+    n_plot_max = 3
+    n_plot_max_per_seqid = 2
     red_trials = [] # TODO
 
     fig = plt.figure()
@@ -20,18 +21,27 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_
     ax.set_aspect('equal')
 
     # Get number of unique seq_id for coloring
-    uniq_seq_id = []
+    list_seq_id = []
     for n in range(len(seq)):
         if hasattr(seq[0], 'seq_id'):
-            uniq_seq_id.append(seq[n].seq_id)
-    uniq_seq_id = set(uniq_seq_id)
+            list_seq_id.append(seq[n].seq_id)
+    uniq_seq_id = set(list_seq_id)
+
+    # Select trials with different seq_id
+    trial_ids_plot = []
+    for sid in uniq_seq_id:
+        ids = [i for i,s in enumerate(list_seq_id) if s==sid]
+        trial_ids_plot+=ids[:n_plot_max_per_seqid]
+
     # TODO Create colormap for len(uniq_seq_id) colors
     # Category10 color palette
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728',
               '#9467bd', '#8c564b', '#e377c2', '#7f7f7f',
               '#bcbd22', '#17becf']
+    cond_label = {0:'BZD', 1:'EtGI', 2:'Air', 3:'Hex', 4:'MVT0'}
 
-    for n in range(min(len(seq), n_plot_max)):
+    # for n in range(min(len(seq), n_plot_max)):
+    for n in trial_ids_plot:
         dat_xspec = getattr(seq[n], xspec)
         dat = dat_xspec[dims_to_plot,:]
         T = seq[n].T
@@ -43,8 +53,17 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_
             ax.plot(x_1, x_2, x_3, color='grey', marker='.', markersize=4)
         else:
             # Color based on seq_id
-            ax.plot(x_1, x_2, x_3, color=colors[min(seq[n].seq_id, len(colors)-1)], marker='.',\
-                     markersize=4, label='Cond: '+str(seq[n].seq_id)+', Trial: '+str(seq[n].trial_id))
+            # ax.plot(x_1, x_2, x_3, color=colors[min(seq[n].seq_id, len(colors)-1)], marker='.',\
+            #          markersize=4, label='Cond: '+str(seq[n].seq_id)+', Trial: '+str(seq[n].trial_id))
+
+            # ax.plot(x_1, x_2, x_3, color=colors[min(seq[n].seq_id, len(colors)-1)], alpha=0.6, marker='.',\
+            #          markersize=4, label='Cond: '+str(cond_label[min(seq[n].seq_id, len(cond_label)-1)])+', Trial: '+str(seq[n].trial_id))
+            if seq[n].seq_id==2:
+                ax.plot(x_1, x_2, x_3, color=colors[min(seq[n].seq_id, len(colors)-1)], alpha=0.6, marker='.',\
+                         markersize=4, label='Cond: '+str(cond_label[min(seq[n].seq_id, len(cond_label)-1)])+', Trial: '+str(seq[n].trial_id))
+            else:
+                ax.plot(x_1, x_2, x_3, color='grey', alpha=0.6, marker='.',\
+                         markersize=4, label='Cond: Not Air, Trial: '+str(seq[n].trial_id))
 
     if len(uniq_seq_id)>0:
         # Remove duplicate labels
@@ -87,6 +106,12 @@ def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_
     Zb = 0.5*max_range*np.mgrid[-1:2:2,-1:2:2,-1:2:2][2].flatten() + 0.5*(Z.max()+Z.min())
     for xb, yb, zb in zip(Xb, Yb, Zb):
        ax.plot([xb], [yb], [zb], 'w')
+
+    # Remove plane color and grid
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.grid(False)
 
     plt.tight_layout()
     plt.savefig(output_file+'_plot_3d.pdf', transparent=True)
