@@ -18,7 +18,8 @@ import matplotlib.pyplot as plt
 RUN_ID = 1
 OUTPUT_DIR = './output/'+str(RUN_ID)+'/'
 
-x_dim = 4 # latent dimension
+x_dim = 8 # latent dimension for 'rbf'
+# x_dim = 2 # for 'sm'
 method = 'gpfa'
 param_cov_type = 'rbf' # type of kernel: 'rbf' or 'sm'
 param_Q = 2 # number of mixtures for SM
