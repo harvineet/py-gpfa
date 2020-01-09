@@ -90,7 +90,7 @@ def em(current_params, seq, kernSDList, minVarFrac):
         if current_params.learnGPNoise: 
             current_params.eps = res.eps
         
-        tEnd = tic - timeit.default_timer()
+        tEnd = timeit.default_timer() - tic
         iterTime.append(tEnd)
 
             # Display the most recent likelihood that was evaluated
