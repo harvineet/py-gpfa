@@ -28,7 +28,7 @@ def cosmoother_gpfa_viaOrth_fast(seq, params, mList):
 
     out_seq = []
     for i in range(len(seq)):
-        out_seq.append( {'dim'+str(key): np.empty((yDim, seq[key].T)) * np.nan for key in mList} )
+        out_seq.append( {'dim'+str(key): np.empty((yDim, seq[i].T)) * np.nan for key in mList} )
 
     for j in range(Tu.size):
 
