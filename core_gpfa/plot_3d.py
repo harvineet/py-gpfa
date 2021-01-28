@@ -3,11 +3,16 @@ import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
+from data_simulator import load_params
+from core_gpfa.postprocess import orthogonalize
 
 mpl.rcParams['legend.fontsize'] = 10
 mpl.rcParams['figure.figsize'] = [10, 6]
 # mpl.rcParams['figure.dpi'] = 300
 plt.rc('text', usetex=True)
+
+def get_colors(n_colors):
+    return plt.cm.twilight(np.linspace(0,1-1/n_colors,n_colors))
 
 # TODO sample multiple seq_id and plot
 def plot_3d(seq, xspec='x_orth', dims_to_plot=[0,1,2], output_file='output/plot_3d.pdf'):
@@ -172,10 +177,12 @@ def plot_1d(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d.pdf')
 
 # Uncertainty plots based on code by Martin Krasser https://github.com/krasserm
 # Source https://github.com/krasserm/bayesian-machine-learning/blob/master/gaussian_processes_util.py
-def plot_1d_error(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d_error.pdf'):
+def plot_1d_error(seq, xspec='x_orth', bin_width=50, output_file='output/plot_1d_error.pdf', cov_type='rbf'):
     # Plot prediction for each latent dimension over time
 
     n_plot_max = 5
+    n_plot = min(len(seq), n_plot_max)
+    colors = get_colors(n_plot)
     red_trials = [] # TODO
 
     n_cols = 4
@@ -186,6 +193,11 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d
     X_all = np.concatenate([getattr(trial, xspec) for trial in seq], 1)
     x_max = np.ceil(10 * np.max(np.abs(X_all))) / 10
 
+    # perform SVD on true_X_all to get orthogonalized "acutal" latent space
+    params = load_params('input/example_params_{}.mat'.format(cov_type))
+    true_X_all = np.concatenate([trial.x for trial in seq], 1)
+    (true_X_orth, true_C_orth, _) = orthogonalize(true_X_all, params.C, full_mat=True)
+
     T_max = np.max([trial.T for trial in seq])
     xtk_step = np.ceil(T_max/25.0) * 5
     xtk = np.arange(0, T_max, xtk_step)
@@ -194,32 +206,51 @@ def plot_1d_error(seq, xspec='x_orth', bin_width=20, output_file='output/plot_1d
 
     n_rows = int(np.ceil(X_all.shape[0]*1.0 / n_cols))
 
-    for k in range(X_all.shape[0]):
+    for k in range(X_all.shape[0]):  # for each latent dimension
         ax = plt.subplot(n_rows, n_cols, k+1)
+        startT = 0
+        endT = 0
 
-        for n in range(min(len(seq), n_plot_max)):
+        acts = [[]] * n_plot
+        sq_errs = [[]] * n_plot
+        flipped_sq_errs = [[]] * n_plot
+
+        for n in range(n_plot):  # for each trial (up to n_plot_max trials)
+
             dat = getattr(seq[n], xspec)
             T = seq[n].T
+
+            startT = endT
+            endT = startT + T
             
             pred_mean = np.squeeze(np.asarray(dat[k,:])) # dat is originally in matrix format. Can also use np.ravel(dat[k,:])
 
             var = seq[n].Vsm[k,k,:] # CHECK if correct
-            error_bar = 2 * np.sqrt(var) # CHECK if correct
+            error_bar = np.sqrt(var) # CHECK if correct
             # error_bar = 2 * np.sqrt(np.diag(var)) # CHECK if correct
             # Plot error
-            ax.fill_between(range(T), pred_mean + error_bar, pred_mean - error_bar, alpha=0.1)
+            ax.fill_between(range(T), pred_mean + error_bar, pred_mean - error_bar, alpha=0.1, color=colors[n])
 
             # Plot mean
-            ax.plot(range(T), pred_mean, linewidth=1, color='grey', label='Predicted mean')
+            ax.plot(range(T), pred_mean, linewidth=1, color=colors[n], label='Predicted mean')
 
             # Plot actual
             # Dimension of predicted latent states not equal to true latent dimensions 
             if seq[n].x.shape[0] != X_all.shape[0]:
                 print("True and predicted latent state dimensions do not match")
                 break
-            
-            act = np.squeeze(np.asarray(seq[n].x[k,:]))
-            ax.plot(range(T), act, marker='x', linewidth=1, color='red')
+
+            acts[n] = np.squeeze(true_X_orth[k,startT:endT])
+            # sign of the SVD is arbitrary for each latent dimension, so check which gives us a closer match to the data
+            # however, must be the same for each trial within a given latent dimension, so compute sq errors and plot
+            # whichever one minimizes the sq error across all trials
+            sq_errs[n] = np.sum(np.power(acts[n] - pred_mean, 2))
+            flipped_sq_errs[n] = np.sum(np.power(-1.*acts[n] - pred_mean, 2))
+
+        dim_sign = 1.
+        if np.sum(flipped_sq_errs) < np.sum(sq_errs):
+            dim_sign = -1.
+        [ax.plot(range(T), dim_sign*acts[n], marker='x', linewidth=1, color=colors[n]) for n in range(n_plot)]
 
         ax.set_xlim([0, T_max])
         ax.set_ylim([1.1*min(ytk), 1.1*max(ytk)])

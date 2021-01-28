@@ -3,7 +3,7 @@
 import numpy as np
 from core_gpfa.exact_inference_with_LL import exact_inference_with_LL
 
-def orthogonalize(X, C):
+def orthogonalize(X, C, full_mat=False):
     """
     X_orth: orthonormalized latent variables (x_dim x T)
     C_orth: orthonormalized loading matrix (y_dim x x_dim)
@@ -16,7 +16,7 @@ def orthogonalize(X, C):
         C_orth = C / TT
         X_orth = np.matmul(TT, X)
     else:
-        UU, DD, Vh = np.linalg.svd(C, full_matrices=False) # TODO check thin svd
+        UU, DD, Vh = np.linalg.svd(C, full_matrices=full_mat) # TODO check thin svd
         DD = np.diag(DD)
         VV = Vh.T
         # (UU, DD, VV) = svd(C, 0)
@@ -43,7 +43,7 @@ def segment_by_trial(seq, X, fn):
 
     return seq
 
-def postprocess(est_params, seq_train, seq_test, method, kern_SD):
+def postprocess(est_params, seq_train, seq_test, method):
     if method=='gpfa':
         C = est_params.C
         X  = np.concatenate([np.array(trial.xsm) for trial in seq_train], 1)

@@ -55,8 +55,7 @@ result = extract_traj(output_dir=OUTPUT_DIR, data=dat, method=method, x_dim=x_di
 
 # Orthonormalize trajectories
 # Returns results for the last run cross-validation fold, if enabled
-(est_params, seq_train, seq_test) = postprocess(result['params'], result['seq_train'],\
-                                                 result['seq_test'], method, kern_SD)
+(est_params, seq_train, seq_test) = postprocess(result['params'], result['seq_train'], result['seq_test'], method)
 
 print("LL for training: %.4f, for testing: %.4f, method: %s, x_dim:%d, param_cov_type:%s, param_Q:%d"\
          % (result['LLtrain'], result['LLtest'], method, x_dim, param_cov_type, param_Q))
@@ -84,7 +83,7 @@ if len(seq_test)>0:
     # # Plot each dimension of trajectory, test data
     # plot_1d(seq_test, 'x_orth', result['bin_width'])
     # Change to 'x_orth' to plot orthogonalized trajectories
-    plot_1d_error(seq_test, 'xsm', result['bin_width'], output_file=output_file)
+    plot_1d_error(seq_test, 'x_orth', result['bin_width'], output_file=output_file)
 
 # Plot all figures
 plt.show()
